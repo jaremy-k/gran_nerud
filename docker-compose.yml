@@ -1,0 +1,68 @@
+services:
+  db:
+    image: postgres:15
+    container_name: calculate_price_db
+    env_file:
+      .env_prod
+    ports:
+      - "5433:5432"
+    volumes:
+      - ../postgres_data_calculate_price:/var/lib/postgresql/data
+
+
+  redis:
+    image: redis:7
+    container_name: calculate_price_redis
+
+  calculate_price:
+    build:
+      context: .
+    container_name: calculate_price_app
+    env_file:
+      - .env_prod
+    command: [ '/calculate_price/docker/app.sh' ]
+    ports:
+      - "5005:5003"
+    restart: on-failure:10
+    volumes:
+      - ../uploads:/calculate_price/uploads/
+      - ./app/migrations/versions:/calculate_price/app/migrations/versions
+    depends_on:
+      - redis
+      - db
+      - mongo
+
+  celery:
+    build:
+      context: .
+    container_name: calculate_price_celery
+    command: [ '/calculate_price/docker/celery.sh', 'celery' ]
+    env_file:
+      - .env_prod
+    volumes:
+      - ../uploads:/calculate_price/uploads/
+    depends_on:
+      - redis
+
+  flower:
+    build:
+      context: .
+    container_name: calculate_price_flower
+    command: [ '/calculate_price/docker/celery.sh', 'flower' ]
+    env_file:
+      - .env_prod
+    depends_on:
+      - redis
+    ports:
+      - "5555:5555"
+
+  mongo:
+    image: mongo
+    container_name: mongodb_container
+    restart: always
+    env_file:
+      - .env_prod
+    ports:
+      - "27017:27017"
+    volumes:
+      - ../mongo_data_calculate:/data/db

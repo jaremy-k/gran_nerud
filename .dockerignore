@@ -1,0 +1,9 @@
+gunicorn_conf.py
+/venv/
+/postgres-data/
+/.git/
+/.idea/
+/.venv/
+.gitignore
+**/__pycache__/
+**/.DS_Store
