@@ -1,15 +1,4 @@
 services:
-  db:
-    image: postgres:15
-    container_name: calculate_price_db
-    env_file:
-      .env_prod
-    ports:
-      - "5433:5432"
-    volumes:
-      - ../postgres_data_calculate_price:/var/lib/postgresql/data
-
-
   redis:
     image: redis:7
     container_name: calculate_price_redis
