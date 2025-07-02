@@ -1,4 +1,4 @@
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection
@@ -94,10 +94,10 @@ class MongoDAO:
     collection: AsyncIOMotorCollection = None
 
     @classmethod
-    async def find_one_or_none(cls, **filter_by) -> Optional[BaseModel]:
+    async def find_one_or_none(cls, **filter_by) -> Optional[Dict[str, Any]]:
         try:
             document = await cls.collection.find_one(filter_by)
-            return document if document else None
+            return document
         except Exception as e:
             logger.error(f"Error finding document: {str(e)}", exc_info=True)
             return None

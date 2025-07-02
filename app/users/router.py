@@ -5,7 +5,7 @@ from app.users.auth import get_password_hash, authenticate_user, create_access_t
 from app.users.dao import UsersDAO
 from app.users.dependencies import get_current_user, get_current_admin_user
 from app.users.models import Users
-from app.users.shemas import SUsersAuth
+from app.users.shemas import SUsersAuth, SUserAuth
 
 router = APIRouter(
     prefix="/auth",

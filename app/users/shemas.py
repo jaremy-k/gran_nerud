@@ -10,6 +10,14 @@ class SUsersAuth(BaseModel):
         json_encoders = {ObjectId: str}
 
 
+class SUserAuth(BaseModel):
+    email: EmailStr
+    hashed_password: str
+
+    class Config:
+        json_encoders = {ObjectId: str}
+
+
 class SUsersGet(BaseModel):
     name: str
     lastName: str

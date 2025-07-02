@@ -4,6 +4,7 @@ from pydantic import EmailStr
 from jose import jwt
 
 from app.config import settings
+from app.logger import logger
 from app.users.dao import UsersDAO
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -29,6 +30,7 @@ def create_access_token(data: dict) -> str:
 
 async def authenticate_user(email: EmailStr, password: str):
     user = await UsersDAO.find_one_or_none(email=email)
+    logger.info(f"Type: {type(user)}")
     if not (user and verify_password(password, user.hashed_password)):
         return None
     return user
