@@ -1,15 +1,10 @@
-from datetime import datetime
-
 from fastapi import Request, Depends
 
 from jose import jwt, JWTError
 
 from app.config import settings
-from app.exceptions import TokenExpireException, TokenAbsentException, IncorrectTokenFormatEcxeption, \
-    UserIsNotPresentException
+from app.exceptions import TokenAbsentException, IncorrectTokenFormatEcxeption, UserIsNotPresentException
 from app.users.dao import UsersDAO
-from app.users.models import Users
-from app.users.shemas import SUsersAuth, SUserAuth
 
 
 def get_token(request: Request):
@@ -35,7 +30,7 @@ async def get_current_user(token: str = Depends(get_token)):
     return user
 
 
-async def get_current_admin_user(current_user = Depends(get_current_user)):
+async def get_current_admin_user(current_user=Depends(get_current_user)):
     if not current_user.admin:
         raise UserIsNotPresentException
     return current_user

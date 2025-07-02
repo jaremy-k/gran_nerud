@@ -5,7 +5,7 @@ from app.users.auth import get_password_hash, authenticate_user, create_access_t
 from app.users.dao import UsersDAO
 from app.users.dependencies import get_current_user, get_current_admin_user
 from app.users.models import Users
-from app.users.shemas import SUserAuth, SUsersAuth
+from app.users.shemas import SUsersAuth
 
 router = APIRouter(
     prefix="/auth",
@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 @router.post("/register")
-async def register_user(user_data: SUserAuth):
+async def register_user(user_data: SUsersAuth):
     existing_user = await UsersDAO.find_one_or_none(email=user_data.email)
     if existing_user:
         raise UserAlreadyExistsException
@@ -24,7 +24,7 @@ async def register_user(user_data: SUserAuth):
 
 
 @router.post("/login")
-async def login_user(response: Response, user_data: SUserAuth):
+async def login_user(response: Response, user_data: SUsersAuth):
     user = await authenticate_user(user_data.email, user_data.password)
     if not user:
         raise IncorrectEmailOrPasswordException
@@ -44,6 +44,6 @@ async def read_users_me(current_user: Users = Depends(get_current_user)):
 
 
 @router.get("/all")
-async def read_users_all(current_user=Depends(get_current_admin_user)) -> list[SUsersAuth]:
+async def read_users_all(current_user=Depends(get_current_admin_user)):
     users = await UsersDAO.find_all()
     return users

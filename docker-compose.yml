@@ -1,43 +1,42 @@
 services:
   redis:
     image: redis:7
-    container_name: calculate_price_redis
+    container_name: grand_nerud_redis
 
-  calculate_price:
+  grand_nerud:
     build:
       context: .
-    container_name: calculate_price_app
+    container_name: grand_nerud_app
     env_file:
       - .env_prod
-    command: [ '/calculate_price/docker/app.sh' ]
+    command: [ '/grand_nerud/docker/app.sh' ]
     ports:
       - "5005:5003"
     restart: on-failure:10
     volumes:
-      - ../uploads:/calculate_price/uploads/
-      - ./app/migrations/versions:/calculate_price/app/migrations/versions
+      - ../uploads:/grand_nerud/uploads/
+      - ./app/migrations/versions:/grand_nerud/app/migrations/versions
     depends_on:
       - redis
-      - db
       - mongo
 
   celery:
     build:
       context: .
-    container_name: calculate_price_celery
-    command: [ '/calculate_price/docker/celery.sh', 'celery' ]
+    container_name: grand_nerud_celery
+    command: [ '/grand_nerud/docker/celery.sh', 'celery' ]
     env_file:
       - .env_prod
     volumes:
-      - ../uploads:/calculate_price/uploads/
+      - ../uploads:/grand_nerud/uploads/
     depends_on:
       - redis
 
   flower:
     build:
       context: .
-    container_name: calculate_price_flower
-    command: [ '/calculate_price/docker/celery.sh', 'flower' ]
+    container_name: grand_nerud_flower
+    command: [ '/grand_nerud/docker/celery.sh', 'flower' ]
     env_file:
       - .env_prod
     depends_on:
@@ -47,11 +46,11 @@ services:
 
   mongo:
     image: mongo
-    container_name: mongodb_container
+    container_name: mongodb_grand_nerud
     restart: always
     env_file:
       - .env_prod
     ports:
       - "27017:27017"
     volumes:
-      - ../mongo_data_calculate:/data/db
+      - ../mongo_data_grand_nerud:/data/db

@@ -6,8 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.logger import logger
 from app.users.router import router as router_users
-from app.calculates.router import router as router_calculates
-from app.cars.router import router as router_marks
 
 
 @asynccontextmanager
@@ -17,7 +15,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="calculate price",
+    title="grand_nerud",
     version="0.1.0",
     swagger_ui_parameters={"defaultModelsExpandDepth": -1},
     lifespan=lifespan
@@ -32,8 +30,6 @@ app.add_middleware(
 )
 
 app.include_router(router_users)
-app.include_router(router_calculates)
-app.include_router(router_marks)
 
 
 @app.middleware("http")
