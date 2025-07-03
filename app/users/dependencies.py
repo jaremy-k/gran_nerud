@@ -1,10 +1,13 @@
+from bson import ObjectId
 from fastapi import Request, Depends
 
 from jose import jwt, JWTError
 
 from app.config import settings
 from app.exceptions import TokenAbsentException, IncorrectTokenFormatEcxeption, UserIsNotPresentException
+from app.logger import logger
 from app.users.dao import UsersDAO
+from app.users.shemas import SUsersGet
 
 
 def get_token(request: Request):
@@ -22,9 +25,11 @@ async def get_current_user(token: str = Depends(get_token)):
     except JWTError:
         raise IncorrectTokenFormatEcxeption
     user_id: str = payload.get("sub")
+    logger.info(f"user_id: {user_id}")
     if not user_id:
         raise UserIsNotPresentException
-    user = await UsersDAO.find_one_or_none(id=int(user_id))
+    user_dict = await UsersDAO.find_one_or_none(_id=ObjectId(user_id))
+    user = SUsersGet.model_validate(user_dict)
     if not user:
         raise UserIsNotPresentException
     return user

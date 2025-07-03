@@ -6,6 +6,7 @@ from jose import jwt
 from app.config import settings
 from app.logger import logger
 from app.users.dao import UsersDAO
+from app.users.shemas import SUsersGet
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -29,8 +30,8 @@ def create_access_token(data: dict) -> str:
 
 
 async def authenticate_user(email: EmailStr, password: str):
-    user = await UsersDAO.find_one_or_none(email=email)
-    logger.info(f"Type: {type(user)}")
+    user_dict = await UsersDAO.find_one_or_none(email=email)
+    user = SUsersGet.model_validate(user_dict)
     if not (user and verify_password(password, user.hashed_password)):
         return None
     return user

@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.logger import logger
 from app.users.router import router as router_users
+from app.materials.router import router as router_materials
 
 
 @asynccontextmanager
@@ -30,6 +31,7 @@ app.add_middleware(
 )
 
 app.include_router(router_users)
+app.include_router(router_materials)
 
 
 @app.middleware("http")
