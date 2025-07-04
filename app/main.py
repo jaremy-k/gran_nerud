@@ -7,6 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.logger import logger
 from app.users.router import router as router_users
 from app.materials.router import router as router_materials
+from app.companies.router import router as router_companies
+from app.deals.router import router as router_deals
+from app.services.router import router as router_services
+from app.stages.router import router as router_stages
+from app.vehicles.router import router as router_vehicles
 
 
 @asynccontextmanager
@@ -31,7 +36,13 @@ app.add_middleware(
 )
 
 app.include_router(router_users)
+app.include_router(router_users)
 app.include_router(router_materials)
+app.include_router(router_companies)
+app.include_router(router_deals)
+app.include_router(router_services)
+app.include_router(router_stages)
+app.include_router(router_vehicles)
 
 
 @app.middleware("http")

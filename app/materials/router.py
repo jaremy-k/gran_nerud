@@ -3,7 +3,6 @@ from typing import Optional
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 
-from app.exceptions import NotUniqueEntity
 from app.logger import logger
 from app.materials.dao import MaterialsDAO
 from app.materials.shemas import SMaterials, SMaterialsAdd
@@ -277,7 +276,7 @@ async def check_material_dependencies(material_id: str) -> bool:
 
     # Проверяем, используется ли материал в продуктах
     deals_using_materials = await DealsDAO.count(
-        {"materials": ObjectId(material_id)}
+        {"materialId": ObjectId(material_id)}
     )
 
     # Можно добавить другие проверки (заказы, документы и т.д.)

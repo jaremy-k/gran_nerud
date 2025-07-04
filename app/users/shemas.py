@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from bson import ObjectId
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -26,6 +28,8 @@ class SUsersGet(BaseModel):
     email: str | None = None
     admin: bool | None = None
     hashed_password: str | None = None
+    deleted_at: datetime | None = None
+    is_deleted: bool | None = None
 
     @field_validator("id", mode="before")
     def convert_objectid(cls, v):
