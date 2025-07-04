@@ -1,29 +1,56 @@
 import logging
 from datetime import datetime
-
-from pythonjsonlogger import jsonlogger
+import pytz
+from pythonjsonlogger import json
 from app.config import settings
 
-logger = logging.getLogger()
-logHandler = logging.StreamHandler()
+
+class CustomJsonFormatter(json.JsonFormatter):
+    def add_fields(self, log_record, record, message_dict):
+        super().add_fields(log_record, record, message_dict)
+
+        # Устанавливаем московское время
+        moscow_tz = pytz.timezone('Europe/Moscow')
+        moscow_time = datetime.now(moscow_tz)
+
+        # Форматируем timestamp
+        log_record['timestamp'] = moscow_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+
+        # Уровень логирования в верхнем регистре
+        log_record['level'] = record.levelname.upper()
+
+        # Добавляем дополнительные поля из record.args
+        if hasattr(record, 'props'):
+            log_record.update(record.props)
 
 
-class CustomJsonFormatter(jsonlogger.JsonFormatter):
-    def addd_fields(self, log_record, record, message_dict):
-        super(CustomJsonFormatter, self).add_fields(log_record, record, message_dict)
-        if not log_record.get("timestamp"):
-            now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-            log_record["timestamp"] = now
-        if log_record.get("level"):
-            log_record["level"] = log_record["level"].upper()
-        else:
-            log_record["level"] = record.levelname
+def setup_logging():
+    """Настройка логгера с JSON-форматированием"""
+    logger = logging.getLogger('app')
+    logger.setLevel(settings.LOG_LEVEL)
+
+    # Очистка предыдущих обработчиков
+    logger.handlers.clear()
+
+    # Создание обработчика
+    handler = logging.StreamHandler()
+
+    # Настройка форматтера
+    formatter = CustomJsonFormatter(
+        '%(timestamp)s %(level)s %(message)s %(module)s %(funcName)s'
+    )
+    handler.setFormatter(formatter)
+
+    logger.addHandler(handler)
+    logger.propagate = False
+
+    return logger
 
 
-formatter = CustomJsonFormatter(
-    "%(timestamp)s %(level)s %(message)s %(module)s %(funcName)s"
-)
+logger = setup_logging()
 
-logHandler.setFormatter(formatter)
-logger.addHandler(logHandler)
-logger.setLevel(settings.LOG_LEVEL)
+
+# Удобная функция для структурированного логирования
+def log_event(level: str, message: str, **kwargs):
+    extra = {'props': kwargs}
+    logger.log(getattr(logging, level.upper()), message, extra=extra)

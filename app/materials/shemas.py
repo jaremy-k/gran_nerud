@@ -1,3 +1,5 @@
+from typing import Optional
+
 from bson import ObjectId
 from pydantic import BaseModel, Field, field_validator
 
@@ -17,7 +19,7 @@ class SMaterials(BaseModel):
 
 
 class SMaterialsAdd(BaseModel):
-    name: str | None = None
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
 
     class Config:
         json_encoders = {ObjectId: str}

@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 
 
-class TgUserException(HTTPException):
+class MainException(HTTPException):
     status_code = 500
     detail = ""
 
@@ -9,30 +9,34 @@ class TgUserException(HTTPException):
         super().__init__(status_code=self.status_code, detail=self.detail)
 
 
-class UserAlreadyExistsException(TgUserException):
+class UserAlreadyExistsException(MainException):
     status_code = status.HTTP_409_CONFLICT
     detail = "Пользователь уже существует"
 
 
-class IncorrectEmailOrPasswordException(TgUserException):
+class IncorrectEmailOrPasswordException(MainException):
     status_code = status.HTTP_401_UNAUTHORIZED
     detail = "Неверная почта или пароль"
 
 
-class TokenExpireException(TgUserException):
+class TokenExpireException(MainException):
     status_code = status.HTTP_401_UNAUTHORIZED
     detail = "Токен истек"
 
 
-class TokenAbsentException(TgUserException):
+class TokenAbsentException(MainException):
     status_code = status.HTTP_401_UNAUTHORIZED
     detail = "Токен отсутствует"
 
 
-class IncorrectTokenFormatEcxeption(TgUserException):
+class IncorrectTokenFormatEcxeption(MainException):
     status_code = status.HTTP_401_UNAUTHORIZED
     detail = "Неверный формат токена"
 
 
-class UserIsNotPresentException(TgUserException):
+class UserIsNotPresentException(MainException):
     status_code = status.HTTP_401_UNAUTHORIZED
+
+
+class NotUniqueEntity(MainException):
+    status_code = status.HTTP_409_CONFLICT
