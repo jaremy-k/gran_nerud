@@ -16,13 +16,13 @@ router = APIRouter(
 
 
 @router.get("/{id}", response_model=SDeals, summary="Получить материал по ID")
-async def get_material(id: str) -> SDeals:
+async def get_deal(id: str, user=Depends(get_current_user)) -> SDeals:
     result = await DealsDAO.find_one_or_none(_id=ObjectId(id))
     return result
 
 
 @router.get("", response_model=list[SDeals], summary="Получить список материалов")
-async def get_materials(data: SDeals = Depends(), user=Depends(get_current_user)) -> list[
+async def get_deals(data: SDeals = Depends(), user=Depends(get_current_user)) -> list[
     SDeals]:
     data.userId = user.id
     result = await DealsDAO.find_all(**data.model_dump(exclude_none=True))
@@ -30,7 +30,7 @@ async def get_materials(data: SDeals = Depends(), user=Depends(get_current_user)
 
 
 @router.get("/admin/get", response_model=list[SDeals], summary="Получить список материалов")
-async def get_materials_for_admins(data: SDeals = Depends(), user=Depends(get_current_admin_user)) -> list[
+async def get_deals_for_admins(data: SDeals = Depends(), user=Depends(get_current_admin_user)) -> list[
     SDeals]:
     result = await DealsDAO.find_all(**data.model_dump(exclude_none=True))
     return result
@@ -39,11 +39,11 @@ async def get_materials_for_admins(data: SDeals = Depends(), user=Depends(get_cu
 @router.post(
     "",
     response_model=SDeals,
-    summary="Добавить материал",
+    summary="Добавить",
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_201_CREATED: {"description": "Материал успешно создан"},
-        status.HTTP_409_CONFLICT: {"description": "Материал с таким именем уже существует"},
+        status.HTTP_201_CREATED: {"description": "Объект успешно создан"},
+        status.HTTP_409_CONFLICT: {"description": "Объект с таким именем уже существует"},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Ошибка сервера"}
     }
 )
@@ -88,10 +88,11 @@ async def add_deal(data: SDealsAdd, user=Depends(get_current_user)):
         500: {"description": "Внутренняя ошибка сервера"}
     }
 )
-async def update_material(
+async def update_deal(
         id: str,
         data: SDealsAdd,
-        background_tasks: BackgroundTasks
+        background_tasks: BackgroundTasks,
+        user=Depends(get_current_user)
 ):
     """
     Обновляет материал с проверкой уникальности имени.
@@ -109,7 +110,7 @@ async def update_material(
         if not existing_material:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Материал не найден"
+                detail="Объект не найден"
             )
 
         update_data = data.model_dump(exclude_none=True)
@@ -136,7 +137,7 @@ async def update_material(
         if not result:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Не удалось обновить материал"
+                detail="Не удалось обновить объект"
             )
 
         return result
@@ -144,7 +145,7 @@ async def update_material(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Ошибка обновления материала: {str(e)}", exc_info=True)
+        logger.error(f"Ошибка обновления объекта: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Внутренняя ошибка сервера"
@@ -154,7 +155,7 @@ async def update_material(
 @router.delete(
     "/{id}",
     response_model=Optional[SDeals],
-    summary="Безопасное удаление материала",
+    summary="Безопасное удаление объекта",
     responses={
         status.HTTP_200_OK: {
             "description": "Материал успешно удален",
@@ -171,10 +172,11 @@ async def update_material(
         }
     }
 )
-async def safe_delete_material(
+async def safe_delete_deal(
         id: str,
         background_tasks: BackgroundTasks,
-        check_dependencies: bool = True
+        check_dependencies: bool = True,
+        user=Depends(get_current_user)
 ):
     """
     Безопасное удаление материала с проверками:
@@ -194,7 +196,7 @@ async def safe_delete_material(
         if not material:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Материал не найден"
+                detail="Объект не найден"
             )
 
         # Проверка зависимостей (если требуется)
@@ -203,7 +205,7 @@ async def safe_delete_material(
             if has_dependencies:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail="Невозможно удалить материал - имеются связанные объекты"
+                    detail="Невозможно удалить обхект - имеются связанные объекты"
                 )
 
         # Софт-удаление (помечаем как удаленный)
@@ -212,7 +214,7 @@ async def safe_delete_material(
         if not result:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Не удалось удалить материал"
+                detail="Не удалось удалить объект"
             )
 
         # Логирование в фоне
