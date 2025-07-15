@@ -7,7 +7,7 @@ from starlette import status
 from app.deals.dao import DealsDAO
 from app.deals.shemas import SDeals, SDealsAdd
 from app.logger import logger
-from app.users.dependencies import get_current_admin_user
+from app.users.dependencies import get_current_user, get_current_admin_user
 
 router = APIRouter(
     prefix="/deals",
@@ -22,7 +22,15 @@ async def get_material(id: str) -> SDeals:
 
 
 @router.get("", response_model=list[SDeals], summary="Получить список материалов")
-async def get_materials(data: SDeals = Depends()) -> list[
+async def get_materials(data: SDeals = Depends(), user=Depends(get_current_user)) -> list[
+    SDeals]:
+    data.userId = user.id
+    result = await DealsDAO.find_all(**data.model_dump(exclude_none=True))
+    return result
+
+
+@router.get("/admin/get", response_model=list[SDeals], summary="Получить список материалов")
+async def get_materials_for_admins(data: SDeals = Depends(), user=Depends(get_current_admin_user)) -> list[
     SDeals]:
     result = await DealsDAO.find_all(**data.model_dump(exclude_none=True))
     return result
@@ -39,33 +47,22 @@ async def get_materials(data: SDeals = Depends()) -> list[
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Ошибка сервера"}
     }
 )
-async def add_adress(data: SDealsAdd):
+async def add_deal(data: SDealsAdd, user=Depends(get_current_user)):
     """
     Добавление нового материала.
 
     Проверяет уникальность имени материала перед добавлением.
     """
     try:
-        # Проверка уникальности name без учёта регистра и с обрезкой пробелов
-        if not await DealsDAO.is_unique(
-                field_name="name",
-                value=data.name,
-                case_sensitive=False,
-                trim_spaces=True
-        ):
-            raise HTTPException(
-                status_code=409,
-                detail="Материал с таким именем уже существует"
-            )
-
         # Создание материала
+        data.userId = user.id
         material_data = data.model_dump(exclude_none=True)
         result = await DealsDAO.add(document=material_data)
 
         if not result:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Не удалось создать материал"
+                detail="Не удалось создать объект"
             )
 
         return result
@@ -116,20 +113,6 @@ async def update_material(
             )
 
         update_data = data.model_dump(exclude_none=True)
-
-        if "name" in update_data:
-            # Проверка на уникальность
-            if not await DealsDAO.is_unique(
-                    field_name="name",
-                    value=data.name,
-                    exclude_id=id,
-                    case_sensitive=False,
-                    trim_spaces=True
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="Материал с таким именем уже существует"
-                )
 
         # Фоновое логирование изменения
         background_tasks.add_task(

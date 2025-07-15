@@ -29,6 +29,7 @@ class SDeals(BaseModel):
     updated_at: datetime | None = None
     deleted_at: datetime | None = None
     is_deleted: bool | None = None
+    userId: str | None = None
 
     @field_validator("id", mode="before")
     def convert_objectid(cls, v):
@@ -59,6 +60,7 @@ class SDealsAdd(BaseModel):
     deadline: datetime | None = None
     notes: str | None = None
     OSSIG: bool | None = None
+    userId: str | None = None
 
     class Config:
         json_encoders = {ObjectId: str}

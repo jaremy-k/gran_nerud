@@ -14,13 +14,13 @@ router = APIRouter(
 
 
 @router.post("/register")
-async def register_user(user_data: SUsersAuth):
-    existing_user = await UsersDAO.find_one_or_none(email=user_data.email)
+async def register_user(data: SUsersAuth):
+    existing_user = await UsersDAO.find_one_or_none(email=data.email)
     if existing_user:
         raise UserAlreadyExistsException
 
-    hashed_password = get_password_hash(user_data.password)
-    await UsersDAO.add(email=user_data.email, hashed_password=hashed_password)
+    hashed_password = get_password_hash(data.password)
+    await UsersDAO.add({"email": data.email, "hashed_password": hashed_password})
 
 
 @router.post("/login")

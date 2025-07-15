@@ -26,6 +26,8 @@ class SCompaniesAdd(BaseModel):
     name: str | None = None
     inn: int | None = None
     contacts: dict | None = None
+    deleted_at: datetime | None = None
+    is_deleted: bool | None = None
 
     class Config:
         json_encoders = {ObjectId: str}

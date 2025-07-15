@@ -179,7 +179,7 @@ class MongoDAO:
     async def is_unique(
             cls,
             field_name: str,
-            value: str,
+            value: Optional[Union[str, int]],
             exclude_id: Optional[Union[str, ObjectId]] = None,
             case_sensitive: bool = False,
             trim_spaces: bool = True

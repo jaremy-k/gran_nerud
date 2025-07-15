@@ -46,10 +46,10 @@ async def add_adress(data: SCompaniesAdd):
     Проверяет уникальность имени материала перед добавлением.
     """
     try:
-        # Проверка уникальности name без учёта регистра и с обрезкой пробелов
+        # Проверка уникальности без учёта регистра и с обрезкой пробелов
         if not await CompaniesDAO.is_unique(
-                field_name="name",
-                value=data.name,
+                field_name="inn",
+                value=data.inn,
                 case_sensitive=False,
                 trim_spaces=True
         ):
@@ -58,7 +58,7 @@ async def add_adress(data: SCompaniesAdd):
                 detail="Материал с таким именем уже существует"
             )
 
-        # Создание материала
+        # Создание
         material_data = data.model_dump(exclude_none=True)
         result = await CompaniesDAO.add(document=material_data)
 
@@ -106,7 +106,7 @@ async def update_material(
     - Не учитывает регистр при проверке уникальности
     """
     try:
-        # Проверяем существование материала
+        # Проверяем существование
         existing_material = await CompaniesDAO.find_one_or_none(_id=ObjectId(id))
 
         if not existing_material:
@@ -117,11 +117,11 @@ async def update_material(
 
         update_data = data.model_dump(exclude_none=True)
 
-        if "name" in update_data:
+        if "inn" in update_data:
             # Проверка на уникальность
             if not await CompaniesDAO.is_unique(
-                    field_name="name",
-                    value=data.name,
+                    field_name="inn",
+                    value=data.inn,
                     exclude_id=id,
                     case_sensitive=False,
                     trim_spaces=True
