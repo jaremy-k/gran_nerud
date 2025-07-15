@@ -7,11 +7,12 @@ from starlette import status
 from app.logger import logger
 from app.services.dao import ServicesDAO
 from app.services.shemas import SServices, SServicesAdd
-from app.users.dependencies import get_current_admin_user
+from app.users.dependencies import get_current_user
 
 router = APIRouter(
     prefix="/services",
-    tags=["Оказываемые услуги"]
+    tags=["Оказываемые услуги"],
+    dependencies=[Depends(get_current_user)]
 )
 
 

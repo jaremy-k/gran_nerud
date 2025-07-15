@@ -6,12 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from app.logger import logger
 from app.materials.dao import MaterialsDAO
 from app.materials.shemas import SMaterials, SMaterialsAdd
-from app.users.dependencies import get_current_admin_user, get_current_user
+from app.users.dependencies import get_current_user
 
 router = APIRouter(
     prefix="/materials",
     tags=["Нерудные материалы"],
-    dependencies=[Depends(get_current_admin_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 

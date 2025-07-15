@@ -5,13 +5,14 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from starlette import status
 
 from app.logger import logger
-from app.users.dependencies import get_current_admin_user
+from app.users.dependencies import get_current_user
 from app.vehicles.dao import VehiclesDAO
 from app.vehicles.shemas import SVehicles, SVehiclesAdd
 
 router = APIRouter(
     prefix="/vehicles",
-    tags=["Машины транспортных компаний"]
+    tags=["Машины транспортных компаний"],
+    dependencies=[Depends(get_current_user)]
 )
 
 
