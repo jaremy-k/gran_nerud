@@ -11,7 +11,7 @@ services:
       - .env_prod
     command: [ '/grand_nerud/docker/app.sh' ]
     ports:
-      - "5005:5003"
+      - "5007:5003"
     restart: on-failure:10
     volumes:
       - ../uploads:/grand_nerud/uploads/
@@ -42,7 +42,7 @@ services:
     depends_on:
       - redis
     ports:
-      - "5555:5555"
+      - "5557:5555"
 
   mongo:
     image: mongo
@@ -51,6 +51,6 @@ services:
     env_file:
       - .env_prod
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - ../mongo_data_grand_nerud:/data/db

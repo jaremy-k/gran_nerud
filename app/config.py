@@ -37,7 +37,7 @@ class Settings(BaseSettings):
 
     @property
     def MONGO_URL(self):
-        return f'mongodb://{self.MONGO_INITDB_ROOT_USERNAME}:{self.MONGO_INITDB_ROOT_PASSWORD}@mongo:27017'
+        return f'mongodb://{self.MONGO_INITDB_ROOT_USERNAME}:{self.MONGO_INITDB_ROOT_PASSWORD}@mongo:27018'
 
     model_config = SettingsConfigDict(env_file=".env_prod")
 
