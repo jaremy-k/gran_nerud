@@ -34,11 +34,11 @@ async def login_user(response: Response, user_data: SUsersAuth):
     response.set_cookie(
         key="tg_news_bot_access_token",
         value=access_token,
-        httponly=True,  # Защита от XSS
-        secure=True,  # Только HTTPS (если не localhost)
-        samesite="none",  # Разрешить кросс-доменные запросы
-        domain=".worldautogroup.ru",  # Укажите ваш домен (с точкой в начале)
-        max_age=int(timedelta(days=30).total_seconds()),  # Срок жизни куки
+        httponly=True,  # Защита от XSS (обязательно)
+        secure=False,  # False для localhost (True для HTTPS в продакшене)
+        samesite="lax",  # "none" не работает без secure=True
+        domain=None,  # Не указываем domain для localhost
+        max_age=30 * 24 * 60 * 60,  # 30 дней в секундах (int)
         path="/",  # Доступна для всех путей
     )
     return {"access_token": access_token}
