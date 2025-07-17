@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, Response, Depends
 
 from app.exceptions import UserAlreadyExistsException, IncorrectEmailOrPasswordException
@@ -29,7 +31,16 @@ async def login_user(response: Response, user_data: SUsersAuth):
     if not user:
         raise IncorrectEmailOrPasswordException
     access_token = create_access_token({"sub": str(user.id)})
-    response.set_cookie("tg_news_bot_access_token", access_token, httponly=True)
+    response.set_cookie(
+        key="tg_news_bot_access_token",
+        value=access_token,
+        httponly=True,  # Защита от XSS
+        secure=True,  # Только HTTPS (если не localhost)
+        samesite="none",  # Разрешить кросс-доменные запросы
+        domain=".worldautogroup.ru",  # Укажите ваш домен (с точкой в начале)
+        max_age=int(timedelta(days=30).total_seconds()),  # Срок жизни куки
+        path="/",  # Доступна для всех путей
+    )
     return {"access_token": access_token}
 
 
