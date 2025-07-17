@@ -33,7 +33,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=[""],
-    expose_headers=["set-cookie"]
+    expose_headers=["*"]
 )
 
 app.include_router(router_users)
@@ -55,6 +55,9 @@ async def add_process_time_header(request: Request, call_next):
     logger.info("Request handling time", extra={
         "process_time": round(process_time, 4)
     })
+
+    response.headers["Access-Control-Allow-Origin"] = request.headers.get("origin", "*")
+    response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
 
 
