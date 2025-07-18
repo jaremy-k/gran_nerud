@@ -37,7 +37,7 @@ async def login_user(response: Response, user_data: SUsersAuth):
         httponly=True,  # Защита от XSS (обязательно)
         secure=False,  # False для localhost (True для HTTPS в продакшене)
         samesite="none",  # "none" не работает без secure=True
-        # domain="None",  # Не указываем domain для localhost
+        domain="None",  # Не указываем domain для localhost
         max_age=30 * 24 * 60 * 60,  # 30 дней в секундах (int)
         path="/",  # Доступна для всех путей
     )
