@@ -12,14 +12,8 @@ from app.users.shemas import SUsersGet
 
 def get_token(request: Request):
     # token = request.cookies.get("tg_news_bot_access_token")
-    # token = request.headers.get("tg_news_bot_access_token")
-
-    token = (
-            request.headers.get("tg_news_bot_access_token") or
-            request.headers.get("TG_NEWS_BOT_ACCESS_TOKEN") or
-            request.headers.get("Tg-News-Bot-Access-Token")
-    )
-
+    token = request.headers.get("x-user-id")
+    logger.info(f"Token: {token}")
     if not token:
         raise TokenAbsentException
     return token
