@@ -32,7 +32,13 @@ app.add_middleware(
     allow_origins=["http://localhost:3000", "https://webhooktestjaremyapi.loca.lt"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
+    # allow_headers=["*"],
+    allow_headers=[
+        "tg_news_bot_access_token",
+        "TG_NEWS_BOT_ACCESS_TOKEN",
+        "Authorization",
+        "Content-Type"
+    ],
     expose_headers=["*"]
 )
 
