@@ -35,9 +35,9 @@ async def login_user(response: Response, user_data: SUsersAuth):
         key="tg_news_bot_access_token",
         value=access_token,
         httponly=True,  # Защита от XSS (обязательно)
-        secure=False,  # False для localhost (True для HTTPS в продакшене)
-        samesite="lax",  # "none" не работает без secure=True
-        domain=None,  # Не указываем domain для localhost
+        secure=True,  # False для localhost (True для HTTPS в продакшене)
+        samesite="none",  # "none" не работает без secure=True
+        domain="webhooktestjaremyapi.loca.lt",  # Не указываем domain для localhost
         max_age=30 * 24 * 60 * 60,  # 30 дней в секундах (int)
         path="/",  # Доступна для всех путей
     )
