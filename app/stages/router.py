@@ -7,12 +7,12 @@ from starlette import status
 from app.logger import logger
 from app.stages.dao import StagesDAO
 from app.stages.shemas import SStages, SStagesAdd
-from app.users.dependencies import get_current_admin_user
+from app.users.dependencies import get_current_user
 
 router = APIRouter(
     prefix="/stages",
     tags=["Этапы сделки"],
-    dependencies=[Depends(get_current_admin_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 
