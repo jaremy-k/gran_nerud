@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, Response, Depends
 
 from app.exceptions import UserAlreadyExistsException, IncorrectEmailOrPasswordException
@@ -29,7 +31,16 @@ async def login_user(response: Response, user_data: SUsersAuth):
     if not user:
         raise IncorrectEmailOrPasswordException
     access_token = create_access_token({"sub": str(user.id)})
-    response.set_cookie("tg_news_bot_access_token", access_token, httponly=True)
+    response.set_cookie(
+        key="tg_news_bot_access_token",
+        value=access_token,
+        httponly=True,  # Защита от XSS (обязательно)
+        secure=False,  # False для localhost (True для HTTPS в продакшене)
+        samesite="none",  # "none" не работает без secure=True
+        # domain="None",  # Не указываем domain для localhost
+        max_age=30 * 24 * 60 * 60,  # 30 дней в секундах (int)
+        path="/",  # Доступна для всех путей
+    )
     return {"access_token": access_token}
 
 
