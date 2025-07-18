@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from bson import ObjectId
+from bson import ObjectId, Decimal128
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -18,11 +18,11 @@ class SDeals(BaseModel):
     paymentMethod: str | None = None
     shippingAddressId: str | None = None
     deliveryAddresslId: str | None = None
-    amountPurchase: Decimal | None = None
-    amountDelivery: Decimal | None = None
-    companyProfit: Decimal | None = None
-    totalAmount: Decimal | None = None
-    managerProfit: Decimal | None = None
+    amountPurchase: Decimal128 | None = None
+    amountDelivery: Decimal128 | None = None
+    companyProfit: Decimal128 | None = None
+    totalAmount: Decimal128 | None = None
+    managerProfit: Decimal128 | None = None
     deadline: datetime | None = None
     notes: str | None = None
     OSSIG: bool | None = None
@@ -52,11 +52,12 @@ class SDealsAdd(BaseModel):
     paymentMethod: str | None = None
     shippingAddressId: str | None = None
     deliveryAddresslId: str | None = None
-    amountPurchase: Decimal | None = None
-    amountDelivery: Decimal | None = None
-    companyProfit: Decimal | None = None
-    totalAmount: Decimal | None = None
-    managerProfit: Decimal | None = None
+    amountPerUnit: Decimal128 | None = None
+    amountPurchase: Decimal128 | None = None
+    amountDelivery: Decimal128 | None = None
+    companyProfit: Decimal128 | None = None
+    totalAmount: Decimal128 | None = None
+    managerProfit: Decimal128 | None = None
     deadline: datetime | None = None
     notes: str | None = None
     OSSIG: bool | None = None
