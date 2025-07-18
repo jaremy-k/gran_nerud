@@ -16,15 +16,15 @@ router = APIRouter(
 
 
 @router.get("/{id}", response_model=SDeals, summary="Получить материал по ID")
-async def get_deal(id: str, user=Depends(get_current_user)) -> SDeals:
+async def get_deal(id: str) -> SDeals:
     result = await DealsDAO.find_one_or_none(_id=ObjectId(id))
     return result
 
 
 @router.get("", response_model=list[SDeals], summary="Получить список материалов")
-async def get_deals(data: SDeals = Depends(), user=Depends(get_current_user)) -> list[
+async def get_deals(data: SDeals = Depends()) -> list[
     SDeals]:
-    data.userId = user.id
+    # data.userId = user.id
     result = await DealsDAO.find_all(**data.model_dump(exclude_none=True))
     return result
 
