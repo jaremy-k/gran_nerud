@@ -69,20 +69,20 @@ class SDealsAdd(BaseModel):
     OSSIG: bool | None = None
     userId: ObjectId | None = None
 
-    @field_validator(
-        "serviceId", "customerId", "stageId", "materialId",
-        "shippingAddressId", "deliveryAddressId", "userId",
-        mode="before"
-    )
-    def convert_str_to_objectid(cls, v):
-        if v is None:
-            return None
-        if isinstance(v, ObjectId):
-            return v
-        try:
-            return ObjectId(v)
-        except Exception:
-            raise ValueError(f"Invalid ObjectId: {v}")
+    @field_validator('*', mode='before')
+    def validate_objectid_fields(cls, v, info):
+        if info.field_name in ['serviceId', 'customerId', 'stageId',
+                               'materialId', 'shippingAddressId',
+                               'deliveryAddressId', 'userId']:
+            if v is None:
+                return None
+            if isinstance(v, ObjectId):
+                return v
+            try:
+                return ObjectId(v)
+            except Exception:
+                raise ValueError(f"Invalid ObjectId for field {info.field_name}: {v}")
+        return v
 
     class Config:
         json_encoders = {ObjectId: str}
