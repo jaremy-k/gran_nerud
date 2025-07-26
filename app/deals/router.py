@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from bson import ObjectId
@@ -133,6 +134,7 @@ async def add_deal(data: SDealsAdd, user=Depends(get_current_user)):
     try:
         # Создание материала
         data.userId = ObjectId(user.id)
+        data.createdAt = datetime.now()
         material_data = data.model_dump(exclude_none=True)
         result = await DealsDAO.add(document=material_data)
 
