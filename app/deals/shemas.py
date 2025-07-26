@@ -49,6 +49,7 @@ class SDeals(BaseModel):
 
 
 class SDealsAdd(BaseModel):
+    createdAt: datetime | None = None
     serviceId: str | None = None
     customerId: str | None = None
     stageId: str | None = None
