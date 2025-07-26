@@ -1,5 +1,5 @@
 from datetime import datetime
-from decimal import Decimal
+from typing import Optional
 
 from bson import ObjectId
 from pydantic import BaseModel, Field, field_validator
@@ -31,14 +31,20 @@ class SDeals(BaseModel):
     is_deleted: bool | None = None
     userId: str | None = None
 
-    @field_validator("id", mode="before")
-    def convert_objectid(cls, v):
+    @field_validator("*", mode="before")
+    def convert_all_objectids(cls, v, field):
         if isinstance(v, ObjectId):
             return str(v)
+        # Для полей, которые могут содержать ObjectId в списке/словаре
+        if isinstance(v, list):
+            return [str(i) if isinstance(i, ObjectId) else i for i in v]
+        if isinstance(v, dict):
+            return {k: str(val) if isinstance(val, ObjectId) else val for k, val in v.items()}
         return v
 
     class Config:
         json_encoders = {ObjectId: str}
+        arbitrary_types_allowed = True
 
 
 class SDealsAdd(BaseModel):
@@ -67,3 +73,21 @@ class SDealsAdd(BaseModel):
         json_encoders = {ObjectId: str}
         from_attributes = True
         populate_by_name = True
+
+
+class SDealsWithRelations(SDeals):
+    service: Optional[dict] = None
+    customer: Optional[dict] = None
+    stage: Optional[dict] = None
+    material: Optional[dict] = None
+    shipping_address: Optional[dict] = None
+    delivery_address: Optional[dict] = None
+
+    @field_validator("id", mode="before")
+    def convert_objectid(cls, v):
+        if isinstance(v, ObjectId):
+            return str(v)
+        return v
+
+    class Config:
+        json_encoders = {ObjectId: str}

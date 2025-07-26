@@ -5,9 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from starlette import status
 
 from app.deals.dao import DealsDAO
-from app.deals.shemas import SDeals, SDealsAdd
+from app.deals.shemas import SDeals, SDealsAdd, SDealsWithRelations
 from app.logger import logger
 from app.users.dependencies import get_current_user, get_current_admin_user
+
 
 router = APIRouter(
     prefix="/deals",
@@ -15,7 +16,7 @@ router = APIRouter(
 )
 
 
-@router.get("/{id}", response_model=SDeals, summary="Получить материал по ID")
+# @router.get("/{id}", response_model=SDeals, summary="Получить материал по ID")
 async def get_deal(id: str, user=Depends(get_current_user)) -> SDeals:
     result = await DealsDAO.find_one_or_none(_id=ObjectId(id))
     return result
@@ -27,6 +28,75 @@ async def get_deals(data: SDeals = Depends(), user=Depends(get_current_user)) ->
     data.userId = user.id
     result = await DealsDAO.find_all(**data.model_dump(exclude_none=True))
     return result
+
+
+@router.get("/{id}",
+            response_model=SDealsWithRelations,
+            summary="Получить сделку с связанными объектами")
+async def get_deal_with_relations(id: str):
+    pipeline = [
+        {"$match": {"_id": ObjectId(id)}},
+        {"$lookup": {
+            "from": "services",
+            "localField": "serviceId",
+            "foreignField": "_id",
+            "as": "service"
+        }},
+        {"$lookup": {
+            "from": "customers",
+            "localField": "customerId",
+            "foreignField": "_id",
+            "as": "customer"
+        }},
+        {"$lookup": {
+            "from": "stages",
+            "localField": "stageId",
+            "foreignField": "_id",
+            "as": "stage"
+        }},
+        {"$lookup": {
+            "from": "materials",
+            "localField": "materialId",
+            "foreignField": "_id",
+            "as": "material"
+        }},
+        {"$lookup": {
+            "from": "addresses",
+            "localField": "shippingAddressId",
+            "foreignField": "_id",
+            "as": "shipping_address"
+        }},
+        {"$lookup": {
+            "from": "addresses",
+            "localField": "deliveryAddressId",
+            "foreignField": "_id",
+            "as": "delivery_address"
+        }},
+        {"$addFields": {
+            "service": {"$arrayElemAt": ["$service", 0]},
+            "customer": {"$arrayElemAt": ["$customer", 0]},
+            "stage": {"$arrayElemAt": ["$stage", 0]},
+            "material": {"$arrayElemAt": ["$material", 0]},
+            "shipping_address": {"$arrayElemAt": ["$shipping_address", 0]},
+            "delivery_address": {"$arrayElemAt": ["$delivery_address", 0]},
+        }}
+    ]
+
+    result = await DealsDAO.aggregate(pipeline)
+    if not result:
+        raise HTTPException(status_code=404, detail="Deal not found")
+
+    return result[0]
+
+    # def convert_ids(data):
+    #     if isinstance(data, dict):
+    #         return {k: str(v) if isinstance(v, ObjectId) else convert_ids(v)
+    #                 for k, v in data.items()}
+    #     elif isinstance(data, list):
+    #         return [convert_ids(item) for item in data]
+    #     return data
+    #
+    # return convert_ids(result[0])
 
 
 @router.get("/admin/get", response_model=list[SDeals], summary="Получить список материалов")

@@ -57,12 +57,23 @@ class MongoDAO:
             return []
 
     @classmethod
+    async def aggregate(cls, pipeline: List[Dict]) -> List[Dict[str, Any]]:
+        """Execute aggregation pipeline"""
+        try:
+            cursor = cls.collection.aggregate(pipeline)
+            return [doc async for doc in cursor]
+        except Exception as e:
+            logger.error(f"Error executing aggregation: {str(e)}", exc_info=True)
+            return []
+
+    @classmethod
     async def add(cls, document: Dict) -> Optional[Dict[str, Any]]:
         """
         Insert a document and return the created document.
         Motor-specific implementation without return_document parameter.
         """
         try:
+
             result = await cls.collection.insert_one(document)
             if result.inserted_id:
                 return await cls.collection.find_one({"_id": result.inserted_id})
