@@ -1,8 +1,34 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any
 
 from bson import ObjectId
 from pydantic import BaseModel, Field, field_validator
+from pydantic_core import core_schema
+
+
+class PyObjectId(str):
+    @classmethod
+    def __get_pydantic_core_schema__(cls, _source_type: Any, _handler: Any) -> core_schema.CoreSchema:
+        return core_schema.no_info_after_validator_function(
+            cls.validate,
+            core_schema.str_schema(),
+            serialization=core_schema.to_string_ser_schema(),
+        )
+
+    @classmethod
+    def validate(cls, v: Any) -> str:
+        if isinstance(v, ObjectId):
+            return str(v)
+        if isinstance(v, str):
+            try:
+                ObjectId(v)
+                return v
+            except Exception:
+                raise ValueError("Invalid ObjectId")
+        raise ValueError("Must be ObjectId or str")
+
+    def __repr__(self):
+        return f"PyObjectId('{str(self)}')"
 
 
 class SDeals(BaseModel):
@@ -31,33 +57,38 @@ class SDeals(BaseModel):
     is_deleted: bool | None = None
     userId: str | None = None
 
-    @field_validator("*", mode="before")
-    def convert_all_objectids(cls, v, field):
+    @field_validator(
+        "serviceId", "customerId", "stageId", "materialId",
+        "shippingAddressId", "deliveryAddressId", "userId",
+        mode="before"
+    )
+    def convert_to_objectid(cls, v: Any) -> Optional[ObjectId]:
+        if v is None:
+            return None
         if isinstance(v, ObjectId):
-            return str(v)
-        # Для полей, которые могут содержать ObjectId в списке/словаре
-        if isinstance(v, list):
-            return [str(i) if isinstance(i, ObjectId) else i for i in v]
-        if isinstance(v, dict):
-            return {k: str(val) if isinstance(val, ObjectId) else val for k, val in v.items()}
-        return v
+            return v
+        try:
+            return ObjectId(v)
+        except Exception:
+            raise ValueError("Invalid ObjectId")
 
     class Config:
         json_encoders = {ObjectId: str}
         arbitrary_types_allowed = True
+        populate_by_name = True
 
 
 class SDealsAdd(BaseModel):
-    serviceId: ObjectId | None = None
-    customerId: ObjectId | None = None
-    stageId: ObjectId | None = None
-    materialId: ObjectId | None = None
+    serviceId: PyObjectId | None = None
+    customerId: PyObjectId | None = None
+    stageId: PyObjectId | None = None
+    materialId: PyObjectId | None = None
     unitMeasurement: str | None = None
     quantity: float | None = None
     methodReceiving: str | None = None
     paymentMethod: str | None = None
-    shippingAddressId: ObjectId | None = None
-    deliveryAddresslId: ObjectId | None = None
+    shippingAddressId: PyObjectId | None = None
+    deliveryAddresslId: PyObjectId | None = None
     amountPerUnit: float | None = None
     amountPurchase: float | None = None
     amountDelivery: float | None = None
@@ -67,7 +98,7 @@ class SDealsAdd(BaseModel):
     deadline: datetime | None = None
     notes: str | None = None
     OSSIG: bool | None = None
-    userId: ObjectId | None = None
+    userId: PyObjectId | None = None
 
     @field_validator('*', mode='before')
     def validate_objectid_fields(cls, v, info):
