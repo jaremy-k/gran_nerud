@@ -48,16 +48,16 @@ class SDeals(BaseModel):
 
 
 class SDealsAdd(BaseModel):
-    serviceId: str | None = None
-    customerId: str | None = None
-    stageId: str | None = None
-    materialId: str | None = None
+    serviceId: ObjectId | None = None
+    customerId: ObjectId | None = None
+    stageId: ObjectId | None = None
+    materialId: ObjectId | None = None
     unitMeasurement: str | None = None
     quantity: float | None = None
     methodReceiving: str | None = None
     paymentMethod: str | None = None
-    shippingAddressId: str | None = None
-    deliveryAddresslId: str | None = None
+    shippingAddressId: ObjectId | None = None
+    deliveryAddresslId: ObjectId | None = None
     amountPerUnit: float | None = None
     amountPurchase: float | None = None
     amountDelivery: float | None = None
@@ -67,7 +67,7 @@ class SDealsAdd(BaseModel):
     deadline: datetime | None = None
     notes: str | None = None
     OSSIG: bool | None = None
-    userId: str | None = None
+    userId: ObjectId | None = None
 
     class Config:
         json_encoders = {ObjectId: str}
@@ -82,6 +82,7 @@ class SDealsWithRelations(SDeals):
     material: Optional[dict] = None
     shipping_address: Optional[dict] = None
     delivery_address: Optional[dict] = None
+    user: Optional[dict] = None
 
     @field_validator("id", mode="before")
     def convert_objectid(cls, v):

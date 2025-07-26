@@ -72,6 +72,12 @@ async def get_deal_with_relations(id: str):
             "foreignField": "_id",
             "as": "delivery_address"
         }},
+        {"$lookup": {
+            "from": "users",
+            "localField": "userId",
+            "foreignField": "_id",
+            "as": "user"
+        }},
         {"$addFields": {
             "service": {"$arrayElemAt": ["$service", 0]},
             "customer": {"$arrayElemAt": ["$customer", 0]},
@@ -79,6 +85,7 @@ async def get_deal_with_relations(id: str):
             "material": {"$arrayElemAt": ["$material", 0]},
             "shipping_address": {"$arrayElemAt": ["$shipping_address", 0]},
             "delivery_address": {"$arrayElemAt": ["$delivery_address", 0]},
+            "user": {"$arrayElemAt": ["$user", 0]},
         }}
     ]
 
