@@ -57,25 +57,20 @@ class SDeals(BaseModel):
     is_deleted: bool | None = None
     userId: str | None = None
 
-    @field_validator(
-        "serviceId", "customerId", "stageId", "materialId",
-        "shippingAddressId", "deliveryAddressId", "userId",
-        mode="before"
-    )
-    def convert_to_objectid(cls, v: Any) -> Optional[ObjectId]:
-        if v is None:
-            return None
+    @field_validator("*", mode="before")
+    def convert_all_objectids(cls, v, field):
         if isinstance(v, ObjectId):
-            return v
-        try:
-            return ObjectId(v)
-        except Exception:
-            raise ValueError("Invalid ObjectId")
+            return str(v)
+        # Для полей, которые могут содержать ObjectId в списке/словаре
+        if isinstance(v, list):
+            return [str(i) if isinstance(i, ObjectId) else i for i in v]
+        if isinstance(v, dict):
+            return {k: str(val) if isinstance(val, ObjectId) else val for k, val in v.items()}
+        return v
 
     class Config:
         json_encoders = {ObjectId: str}
         arbitrary_types_allowed = True
-        populate_by_name = True
 
 
 class SDealsAdd(BaseModel):
@@ -100,20 +95,20 @@ class SDealsAdd(BaseModel):
     OSSIG: bool | None = None
     userId: PyObjectId | None = None
 
-    @field_validator('*', mode='before')
-    def validate_objectid_fields(cls, v, info):
-        if info.field_name in ['serviceId', 'customerId', 'stageId',
-                               'materialId', 'shippingAddressId',
-                               'deliveryAddressId', 'userId']:
-            if v is None:
-                return None
-            if isinstance(v, ObjectId):
-                return v
-            try:
-                return ObjectId(v)
-            except Exception:
-                raise ValueError(f"Invalid ObjectId for field {info.field_name}: {v}")
-        return v
+    @field_validator(
+        "serviceId", "customerId", "stageId", "materialId",
+        "shippingAddressId", "deliveryAddressId", "userId",
+        mode="before"
+    )
+    def convert_to_objectid(cls, v: Any) -> Optional[ObjectId]:
+        if v is None:
+            return None
+        if isinstance(v, ObjectId):
+            return v
+        try:
+            return ObjectId(v)
+        except Exception:
+            raise ValueError("Invalid ObjectId")
 
     class Config:
         json_encoders = {ObjectId: str}
