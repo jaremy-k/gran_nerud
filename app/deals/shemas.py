@@ -3,32 +3,6 @@ from typing import Optional, Any
 
 from bson import ObjectId
 from pydantic import BaseModel, Field, field_validator
-from pydantic_core import core_schema
-
-
-class PyObjectId(str):
-    @classmethod
-    def __get_pydantic_core_schema__(cls, _source_type: Any, _handler: Any) -> core_schema.CoreSchema:
-        return core_schema.no_info_after_validator_function(
-            cls.validate,
-            core_schema.str_schema(),
-            serialization=core_schema.to_string_ser_schema(),
-        )
-
-    @classmethod
-    def validate(cls, v: Any) -> str:
-        if isinstance(v, ObjectId):
-            return str(v)
-        if isinstance(v, str):
-            try:
-                ObjectId(v)
-                return v
-            except Exception:
-                raise ValueError("Invalid ObjectId")
-        raise ValueError("Must be ObjectId or str")
-
-    def __repr__(self):
-        return f"PyObjectId('{str(self)}')"
 
 
 class SDeals(BaseModel):
@@ -43,7 +17,7 @@ class SDeals(BaseModel):
     methodReceiving: str | None = None
     paymentMethod: str | None = None
     shippingAddressId: str | None = None
-    deliveryAddresslId: str | None = None
+    deliveryAddressId: str | None = None
     amountPurchase: float | None = None
     amountDelivery: float | None = None
     companyProfit: float | None = None
@@ -75,16 +49,16 @@ class SDeals(BaseModel):
 
 
 class SDealsAdd(BaseModel):
-    serviceId: PyObjectId | None = None
-    customerId: PyObjectId | None = None
-    stageId: PyObjectId | None = None
-    materialId: PyObjectId | None = None
+    serviceId: str | None = None
+    customerId: str | None = None
+    stageId: str | None = None
+    materialId: str | None = None
     unitMeasurement: str | None = None
     quantity: float | None = None
     methodReceiving: str | None = None
     paymentMethod: str | None = None
-    shippingAddressId: PyObjectId | None = None
-    deliveryAddresslId: PyObjectId | None = None
+    shippingAddressId: str | None = None
+    deliveryAddressId: str | None = None
     amountPerUnit: float | None = None
     amountPurchase: float | None = None
     amountDelivery: float | None = None
@@ -94,22 +68,19 @@ class SDealsAdd(BaseModel):
     deadline: datetime | None = None
     notes: str | None = None
     OSSIG: bool | None = None
-    userId: PyObjectId | None = None
+    userId: str | None = None
 
     @field_validator(
         "serviceId", "customerId", "stageId", "materialId",
-        "shippingAddressId", "deliveryAddressId", "userId",
-        mode="before"
+        "shippingAddressId", "deliveryAddressId", "userId"
     )
-    def convert_to_objectid(cls, v: Any) -> Optional[ObjectId]:
-        if v is None:
+    def convert_str_to_objectid(cls, v: Optional[str]) -> Optional[ObjectId]:
+        if not v:
             return None
-        if isinstance(v, ObjectId):
-            return v
         try:
             return ObjectId(v)
         except Exception:
-            raise ValueError("Invalid ObjectId")
+            raise ValueError(f"Invalid ObjectId format: {v}")
 
     class Config:
         json_encoders = {ObjectId: str}
