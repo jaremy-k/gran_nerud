@@ -26,7 +26,7 @@ async def get_deal(id: str, user=Depends(get_current_user)) -> SDeals:
 @router.get("", response_model=list[SDeals], summary="Получить список материалов")
 async def get_deals(data: SDeals = Depends(), user=Depends(get_current_user)) -> list[
     SDeals]:
-    data.userId = user.id
+    data.userId = ObjectId(user.id)
     result = await DealsDAO.find_all(**data.model_dump(exclude_none=True))
     return result
 
@@ -108,9 +108,62 @@ async def get_deal_with_relations(id: str):
 
 
 @router.get("/admin/get", response_model=list[SDeals], summary="Получить список материалов")
-async def get_deals_for_admins(data: SDeals = Depends(), user=Depends(get_current_admin_user)) -> list[
-    SDeals]:
-    result = await DealsDAO.find_all(**data.model_dump(exclude_none=True))
+async def get_deals_for_admins(data: SDeals = Depends(), user=Depends(get_current_admin_user)):
+    pipeline = [
+        {"$lookup": {
+            "from": "services",
+            "localField": "serviceId",
+            "foreignField": "_id",
+            "as": "service"
+        }},
+        {"$lookup": {
+            "from": "customers",
+            "localField": "customerId",
+            "foreignField": "_id",
+            "as": "customer"
+        }},
+        {"$lookup": {
+            "from": "stages",
+            "localField": "stageId",
+            "foreignField": "_id",
+            "as": "stage"
+        }},
+        {"$lookup": {
+            "from": "materials",
+            "localField": "materialId",
+            "foreignField": "_id",
+            "as": "material"
+        }},
+        {"$lookup": {
+            "from": "addresses",
+            "localField": "shippingAddressId",
+            "foreignField": "_id",
+            "as": "shipping_address"
+        }},
+        {"$lookup": {
+            "from": "addresses",
+            "localField": "deliveryAddressId",
+            "foreignField": "_id",
+            "as": "delivery_address"
+        }},
+        {"$lookup": {
+            "from": "users",
+            "localField": "userId",
+            "foreignField": "_id",
+            "as": "user"
+        }},
+        {"$addFields": {
+            "service": {"$arrayElemAt": ["$service", 0]},
+            "customer": {"$arrayElemAt": ["$customer", 0]},
+            "stage": {"$arrayElemAt": ["$stage", 0]},
+            "material": {"$arrayElemAt": ["$material", 0]},
+            "shipping_address": {"$arrayElemAt": ["$shipping_address", 0]},
+            "delivery_address": {"$arrayElemAt": ["$delivery_address", 0]},
+            "user": {"$arrayElemAt": ["$user", 0]},
+        }}
+    ]
+
+    result = await DealsDAO.aggregate(pipeline)
     return result
 
 
