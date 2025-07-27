@@ -10,7 +10,6 @@ from app.deals.shemas import SDeals, SDealsAdd, SDealsWithRelations
 from app.logger import logger
 from app.users.dependencies import get_current_user, get_current_admin_user
 
-
 router = APIRouter(
     prefix="/deals",
     tags=["Сделки"]
@@ -107,7 +106,9 @@ async def get_deal_with_relations(id: str):
     # return convert_ids(result[0])
 
 
-@router.get("/admin/get", response_model=list[SDeals], summary="Получить список материалов")
+@router.get("/admin/get",
+            response_model=list[SDealsWithRelations],
+            summary="Получить список сделок со связанными объектами")
 async def get_deals_for_admins(data: SDeals = Depends(), user=Depends(get_current_admin_user)):
     pipeline = [
         {"$lookup": {
