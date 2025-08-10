@@ -32,10 +32,18 @@ async def get_companies(data: SCompanies = Depends()) -> list[
 
 @router.get("/get_company_info/{inn}", summary="Получить компанию по ИНН или ОГРН")
 async def get_company_info(inn: int):
-    params = {'req': inn,
-              'key': settings.API_FNS_KEY}
-    result = requests.get(url=settings.API_FNS_URL, params=params)
-    return result.json()
+    try:
+        params = {'req': inn,
+                  'key': settings.API_FNS_KEY}
+        result = requests.get(url=settings.API_FNS_URL, params=params)
+        logger.info(f"Company info: {result.text}")
+        return result.json()
+    except Exception as e:
+        logger.error(f"Ошибка при получении данных о компании: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка при получении данных о компании"
+        )
 
 
 @router.post(
