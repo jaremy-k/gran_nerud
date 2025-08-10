@@ -198,24 +198,33 @@ class MongoDAO:
         """
         Проверка уникальности значения поля с возможностью:
         - исключения текущего документа
-        - игнорирования регистра
-        - обрезки пробелов по краям
+        - игнорирования регистра (только для строк)
+        - обрезки пробелов по краям (только для строк)
 
         Args:
             field_name: Название поля для проверки
-            value: Значение для проверки
-            exclude_id: ID документа, который следует исключить из проверки (None если не нужно исключать)
-            case_sensitive: Учитывать ли регистр
-            trim_spaces: Обрезать ли пробелы
+            value: Значение для проверки (str или int)
+            exclude_id: ID документа, который следует исключить из проверки
+            case_sensitive: Учитывать ли регистр (для строк)
+            trim_spaces: Обрезать ли пробелы (для строк)
 
         Returns:
             True если значение уникально
         """
         try:
-            query_value = str(value).strip() if (trim_spaces and value is not None) else value
+            # Обработка None значения
+            if value is None:
+                query_value = None
+            else:
+                # Приводим к строке и обрабатываем пробелы для строковых значений
+                if isinstance(value, str):
+                    query_value = value.strip() if trim_spaces else value
+                else:
+                    # Для чисел и других типов оставляем как есть
+                    query_value = value
 
-            # Формируем основной запрос
-            if not case_sensitive:
+            # Формируем запрос с учетом типа значения
+            if isinstance(query_value, str) and not case_sensitive:
                 query = {
                     field_name: {
                         "$regex": f"^{re.escape(query_value)}$",
@@ -229,7 +238,6 @@ class MongoDAO:
             if exclude_id is not None:
                 if isinstance(exclude_id, str):
                     exclude_id = ObjectId(exclude_id)
-
                 query["_id"] = {"$ne": exclude_id}
 
             existing = await cls.collection.find_one(query)
@@ -238,12 +246,3 @@ class MongoDAO:
         except Exception as e:
             logger.error(f"Error checking uniqueness: {str(e)}", exc_info=True)
             return False
-
-    @classmethod
-    async def soft_delete(cls, id: str) -> Optional[Dict]:
-        """Помечает документ как удаленный"""
-        return await cls.collection.find_one_and_update(
-            {"_id": ObjectId(id)},
-            {"$set": {"is_deleted": True, "deleted_at": datetime.now()}},
-            return_document=ReturnDocument.AFTER
-        )
