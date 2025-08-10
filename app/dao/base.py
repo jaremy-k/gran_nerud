@@ -212,7 +212,7 @@ class MongoDAO:
             True если значение уникально
         """
         try:
-            query_value = value.strip() if trim_spaces else value
+            query_value = str(value).strip() if (trim_spaces and value is not None) else value
 
             # Формируем основной запрос
             if not case_sensitive:
