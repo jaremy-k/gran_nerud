@@ -2,6 +2,7 @@ from datetime import datetime
 
 from bson import ObjectId
 from pydantic import BaseModel, Field, field_validator
+from pydantic_settings import SettingsConfigDict
 
 
 class SCompanies(BaseModel):
@@ -18,8 +19,9 @@ class SCompanies(BaseModel):
             return str(v)
         return v
 
-    class Config:
-        json_encoders = {ObjectId: str}
+    model_config = SettingsConfigDict(
+        json_encoders={ObjectId: str}
+    )
 
 
 class SCompaniesAdd(BaseModel):
@@ -29,7 +31,8 @@ class SCompaniesAdd(BaseModel):
     deleted_at: datetime | None = None
     is_deleted: bool | None = None
 
-    class Config:
-        json_encoders = {ObjectId: str}
-        from_attributes = True
-        populate_by_name = True
+    model_config = SettingsConfigDict(
+        json_encoders={ObjectId: str},
+        from_attributes=True,
+        populate_by_name=True
+    )

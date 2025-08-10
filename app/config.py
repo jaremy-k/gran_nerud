@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     MONGO_INITDB_ROOT_PASSWORD: str
     MONGO_INITDB_DATABASE: str
 
+    API_FNS_URL: str
+    API_FNS_KEY: str
+
     @property
     def DATABASE_URL(self):
         return (f'postgresql+asyncpg://{self.POSTGRES_USER}:'
@@ -39,7 +42,9 @@ class Settings(BaseSettings):
     def MONGO_URL(self):
         return f'mongodb://{self.MONGO_INITDB_ROOT_USERNAME}:{self.MONGO_INITDB_ROOT_PASSWORD}@mongo:27017'
 
-    model_config = SettingsConfigDict(env_file=".env_prod")
+    model_config = SettingsConfigDict(
+        env_file=".env_prod"
+    )
 
 
 settings = Settings()

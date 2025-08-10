@@ -1,11 +1,13 @@
 from typing import Optional
 
+import requests
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from starlette import status
 
 from app.companies.dao import CompaniesDAO
 from app.companies.shemas import SCompanies, SCompaniesAdd
+from app.config import settings
 from app.logger import logger
 from app.users.dependencies import get_current_admin_user
 
@@ -15,35 +17,43 @@ router = APIRouter(
 )
 
 
-@router.get("/{id}", response_model=SCompanies, summary="Получить материал по ID")
-async def get_material(id: str) -> SCompanies:
+@router.get("/{id}", response_model=SCompanies, summary="Получить компанию по ID")
+async def get_company_by_id(id: str) -> SCompanies:
     result = await CompaniesDAO.find_one_or_none(_id=ObjectId(id))
     return result
 
 
-@router.get("", response_model=list[SCompanies], summary="Получить список материалов")
-async def get_materials(data: SCompanies = Depends()) -> list[
+@router.get("", response_model=list[SCompanies], summary="Получить список компаний")
+async def get_companies(data: SCompanies = Depends()) -> list[
     SCompanies]:
     result = await CompaniesDAO.find_all(**data.model_dump(exclude_none=True))
     return result
 
 
+@router.get("/get_company_info/{inn}", summary="Получить компанию по ИНН или ОГРН")
+async def get_company_info(inn: int):
+    params = {'req': inn,
+              'key': settings.API_FNS_KEY}
+    result = requests.get(url=settings.API_FNS_URL, params=params)
+    return result.json()
+
+
 @router.post(
     "",
     response_model=SCompanies,
-    summary="Добавить материал",
+    summary="Добавить Объект",
     status_code=status.HTTP_201_CREATED,
     responses={
-        status.HTTP_201_CREATED: {"description": "Материал успешно создан"},
-        status.HTTP_409_CONFLICT: {"description": "Материал с таким именем уже существует"},
+        status.HTTP_201_CREATED: {"description": "Объект успешно создан"},
+        status.HTTP_409_CONFLICT: {"description": "Объект с таким именем уже существует"},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Ошибка сервера"}
     }
 )
-async def add_adress(data: SCompaniesAdd):
+async def add_company(data: SCompaniesAdd):
     """
-    Добавление нового материала.
+    Добавление новой компании.
 
-    Проверяет уникальность имени материала перед добавлением.
+    Проверяет уникальность инн компании перед добавлением.
     """
     try:
         # Проверка уникальности без учёта регистра и с обрезкой пробелов
@@ -55,17 +65,17 @@ async def add_adress(data: SCompaniesAdd):
         ):
             raise HTTPException(
                 status_code=409,
-                detail="Материал с таким именем уже существует"
+                detail="Компания с таким инн уже существует"
             )
 
         # Создание
-        material_data = data.model_dump(exclude_none=True)
-        result = await CompaniesDAO.add(document=material_data)
+        company_data = data.model_dump(exclude_none=True)
+        result = await CompaniesDAO.add(document=company_data)
 
         if not result:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Не удалось создать материал"
+                detail="Не удалось создать компанию"
             )
 
         return result
