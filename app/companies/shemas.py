@@ -26,6 +26,7 @@ class SCompanies(BaseModel):
 
 class SCompaniesAdd(BaseModel):
     name: str | None = None
+    abbreviatedName: str | None = None
     inn: int | None = None
     contacts: dict | None = None
     deleted_at: datetime | None = None
