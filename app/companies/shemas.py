@@ -8,6 +8,7 @@ from pydantic_settings import SettingsConfigDict
 class SCompanies(BaseModel):
     id: str | None = Field(None, alias="_id")
     name: str | None = None
+    abbreviatedName: str | None = None
     inn: int | None = None
     contacts: dict | None = None
     deleted_at: datetime | None = None
