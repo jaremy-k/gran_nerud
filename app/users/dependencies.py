@@ -12,7 +12,7 @@ from app.users.shemas import SUsersGet
 
 def get_token(request: Request):
     token = request.headers.get("x-user-id")
-    # token = request.cookies.get("tg_news_bot_access_token")
+    # token = request.cookies.get("tg_news_bot_access_token ")
     if not token:
         raise TokenAbsentException
     return token
