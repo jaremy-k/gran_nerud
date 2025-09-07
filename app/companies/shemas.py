@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from bson import ObjectId
 from pydantic import BaseModel, Field, field_validator
@@ -10,7 +11,8 @@ class SCompanies(BaseModel):
     name: str | None = None
     abbreviatedName: str | None = None
     inn: int | None = None
-    contacts: dict | None = None
+    contacts: List[dict] | None = None
+    type: str | None = None
     deleted_at: datetime | None = None
     is_deleted: bool | None = None
 
@@ -29,7 +31,8 @@ class SCompaniesAdd(BaseModel):
     name: str | None = None
     abbreviatedName: str | None = None
     inn: int | None = None
-    contacts: dict | None = None
+    contacts: List[dict] | None = None
+    type: str | None = None
     deleted_at: datetime | None = None
     is_deleted: bool | None = None
 
