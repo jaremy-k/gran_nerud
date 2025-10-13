@@ -98,8 +98,8 @@ class SDealsAdd(BaseModel):
     OSSIG: bool | None = None  # это для утилизации
 
     @field_validator(
-        "serviceId", "customerId", "stageId", "materialId",
-        "shippingAddressId", "deliveryAddressId", "userId"
+        "serviceId", "customerId", "stageId", "materialId", "userId"
+        # "shippingAddressId", "deliveryAddressId"
     )
     def convert_str_to_objectid(cls, v: Optional[str]) -> Optional[ObjectId]:
         if not v:
