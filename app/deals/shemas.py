@@ -7,32 +7,43 @@ from pydantic import BaseModel, Field, field_validator
 
 class SDeals(BaseModel):
     id: str | None = Field(None, alias="_id")
-    serviceId: str | None = None
     createdAt: datetime | None = None
-    customerId: str | None = None
-    stageId: str | None = None
-    materialId: str | None = None
-    unitMeasurement: str | None = None
-    quantity: int | None = None
-    methodReceiving: str | None = None
-    paymentMethod: str | None = None
-    shippingAddressId: str | None = None
-    deliveryAddressId: str | None = None
-    amountPurchaseUnit: float | None = None
-    amountPurchaseTotal: float | None = None
-    amountSalesUnit: float | None = None
-    amountSalesTotal: float | None = None
-    amountDelivery: float | None = None
-    margin: float | None = None
-    totalAmount: float | None = None
-    managerProfit: float | None = None
-    deadline: datetime | None = None
+    userId: str | None = None  # менеджер
+    serviceId: str | None = None  # тпа услуги
+    customerId: str | None = None  # заказчик - из companies
+    stageId: str | None = None  # этап сделки
+    materialId: str | None = None  # материал
+    unitMeasurement: str | None = None  # единица измерения
+
+    # финансовые параметры для расчета
+    # итоговая сумма = цена продажи + цена доставки
+    quantity: float | None = None  # количество материала (вручную)
+
+    amountPurchaseUnit: float | None = None  # цена за единицу товара (вручную)
+    amountPurchaseTotal: float | None = None  # цена закупки (количество * цена за единицу) - динамическое
+
+    amountSalesUnit: float | None = None  # цена за единицу товара (вручную)
+    amountSalesTotal: float | None = None  # цена закупки (количество * цена за единицу) - динамическое
+
+    amountDelivery: float | None = None  # цена доставки (вручную)
+    companyProfit: float | None = None  # маржа фирмы (цена продажи - цена закупки - цена доставка) (динамическая)
+
+    totalAmount: float | None = None  # общая сумма для заказчика (цена продажи + цена доставки) (динамическая)
+    managerProfit: float | None = None  # процент менеджеру (процент менеджера * маржа фирмы) (динамическое)
+
+    paymentMethod: str | None = None  # способ оплаты заказчиком (нал, без нал)
+    # адреса
+    shippingAddress: str | None = None  # адрес откгрузки (откуда будут забирать товар)
+    methodReceiving: str | None = None  # способ получения (доставка, самовывоз)
+    deliveryAddress: str | None = None  # адрес доставка (куда доставить товар)
+
+    deadline: datetime | None = None  # срок к которому надо завершить заказ
     notes: str | None = None
-    OSSIG: bool | None = None
-    updated_at: datetime | None = None
-    deleted_at: datetime | None = None
-    is_deleted: bool | None = None
-    userId: str | None = None
+    OSSIG: bool | None = None  # это для утилизации
+
+    updatedAt: datetime | None = None
+    deletedAt: datetime | None = None
+    isDeleted: bool | None = None
 
     @field_validator("*", mode="before")
     def convert_all_objectids(cls, v, field):
@@ -53,26 +64,38 @@ class SDeals(BaseModel):
 
 class SDealsAdd(BaseModel):
     createdAt: datetime | None = None
-    serviceId: str | None = None
-    customerId: str | None = None
-    stageId: str | None = None
-    materialId: str | None = None
-    unitMeasurement: str | None = None
-    quantity: float | None = None
-    methodReceiving: str | None = None
-    paymentMethod: str | None = None
-    shippingAddressId: str | None = None
-    deliveryAddressId: str | None = None
-    amountPerUnit: float | None = None
-    amountPurchase: float | None = None
-    amountDelivery: float | None = None
-    companyProfit: float | None = None
-    totalAmount: float | None = None
-    managerProfit: float | None = None
-    deadline: datetime | None = None
+    userId: str | None = None  # менеджер
+    serviceId: str | None = None  # тпа услуги
+    customerId: str | None = None  # заказчик - из companies
+    stageId: str | None = None  # этап сделки
+    materialId: str | None = None  # материал
+    unitMeasurement: str | None = None  # единица измерения
+
+    # финансовые параметры для расчета
+    # итоговая сумма = цена продажи + цена доставки
+    quantity: float | None = None  # количество материала (вручную)
+
+    amountPurchaseUnit: float | None = None  # цена за единицу товара (вручную)
+    amountPurchaseTotal: float | None = None  # цена закупки (количество * цена за единицу) - динамическое
+
+    amountSalesUnit: float | None = None  # цена за единицу товара (вручную)
+    amountSalesTotal: float | None = None  # цена закупки (количество * цена за единицу) - динамическое
+
+    amountDelivery: float | None = None  # цена доставки (вручную)
+    companyProfit: float | None = None  # маржа фирмы (цена продажи - цена закупки - цена доставка) (динамическая)
+
+    totalAmount: float | None = None  # общая сумма для заказчика (цена продажи + цена доставки) (динамическая)
+    managerProfit: float | None = None  # процент менеджеру (процент менеджера * маржа фирмы) (динамическое)
+
+    paymentMethod: str | None = None  # способ оплаты заказчиком (нал, без нал)
+    # адреса
+    shippingAddress: str | None = None  # адрес откгрузки (откуда будут забирать товар)
+    methodReceiving: str | None = None  # способ получения (доставка, самовывоз)
+    deliveryAddress: str | None = None  # адрес доставка (куда доставить товар)
+
+    deadline: datetime | None = None  # срок к которому надо завершить заказ
     notes: str | None = None
-    OSSIG: bool | None = None
-    userId: str | None = None
+    OSSIG: bool | None = None  # это для утилизации
 
     @field_validator(
         "serviceId", "customerId", "stageId", "materialId",

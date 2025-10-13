@@ -1,8 +1,11 @@
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from typing import Optional, List
 
 from app.logger import logger
 from app.users.router import router as router_users
@@ -27,21 +30,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["http://localhost:3000", "https://webhooktestjaremyapi.loca.lt"],
-#     allow_credentials=True,
-#     allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-#     # allow_headers=["*"],
-#     allow_headers=[
-#         "tg_news_bot_access_token",
-#         "TG_NEWS_BOT_ACCESS_TOKEN",
-#         "Authorization",
-#         "Content-Type"
-#     ],
-#     expose_headers=["*"]
-# )
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -49,6 +37,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+templates = Jinja2Templates(directory="templates")
 
 app.include_router(router_users)
 app.include_router(router_users)
@@ -58,6 +48,16 @@ app.include_router(router_deals)
 app.include_router(router_services)
 app.include_router(router_stages)
 app.include_router(router_vehicles)
+
+services = [
+    {"_id": "1", "name": "продажа сырья"},
+    {"_id": "2", "name": "утилизация"},
+    {"_id": "3", "name": "доставка"}
+]
+companies = [
+    {"_id": "c1", "name": "ООО Ромашка", "inn": "1234567890"},
+    {"_id": "c2", "name": "ООО Лотос", "inn": "9876543210"},
+]
 
 
 @app.middleware("http")
@@ -81,3 +81,50 @@ def read_root():
         "success": True,
         "message": "Welcome to telegram API"
     }
+
+
+@app.get("/deals/new", response_class=HTMLResponse)
+async def new_deal(request: Request):
+    return templates.TemplateResponse("deal_form.html", {
+        "request": request,
+        "services": services,
+        "companies": companies,
+    })
+
+
+@app.post("/deals", response_class=HTMLResponse)
+async def save_deal(
+        request: Request,
+        serviceId: str = Form(...),
+        customerId: str = Form(...),
+        quantity: float = Form(...),
+        amountPerUnit: float = Form(...),
+):
+    total = quantity * amountPerUnit
+    return templates.TemplateResponse("deal_success.html", {
+        "request": request,
+        "serviceId": serviceId,
+        "customerId": customerId,
+        "total": total
+    })
+
+
+# пересчёт суммы (htmx)
+@app.get("/deals/calc", response_class=HTMLResponse)
+async def calc_total(
+        quantity: float = Query(0),
+        amountPerUnit: float = Query(0)
+):
+    total = quantity * amountPerUnit
+    return f"<span class='font-bold text-blue-600'>{total:.2f} ₽</span>"
+
+
+# автопоиск компаний (htmx)
+@app.get("/companies/search", response_class=HTMLResponse)
+async def company_search(q: str = Query("")):
+    results = [c for c in companies if q.lower() in c["name"].lower() or q in c["inn"]]
+    html = "".join(
+        f"<option value='{c['_id']}'>{c['name']} ({c['inn']})</option>"
+        for c in results
+    )
+    return html or "<option disabled>Ничего не найдено</option>"
