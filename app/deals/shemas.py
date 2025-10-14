@@ -43,7 +43,6 @@ class SDeals(BaseModel):
 
     updatedAt: datetime | None = None
     deletedAt: datetime | None = None
-    isDeleted: bool | None = None
 
     @field_validator("*", mode="before")
     def convert_all_objectids(cls, v, field):

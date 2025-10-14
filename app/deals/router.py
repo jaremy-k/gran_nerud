@@ -342,7 +342,7 @@ async def safe_delete_deal(
                 )
 
         # Софт-удаление (помечаем как удаленный)
-        result = await DealsDAO.soft_delete(id)
+        result = await DealsDAO.update_by_id(id, {"deletedAt": datetime.now()})
 
         if not result:
             raise HTTPException(
