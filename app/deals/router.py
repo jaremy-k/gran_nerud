@@ -10,10 +10,22 @@ from app.deals.shemas import SDeals, SDealsAdd, SDealsWithRelations, PaginatedRe
 from app.logger import logger
 from app.users.dependencies import get_current_user, get_current_admin_user
 
+from fastapi.responses import JSONResponse
+import json
+
 router = APIRouter(
     prefix="/deals",
     tags=["Сделки"]
 )
+
+
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, ObjectId):
+            return str(obj)
+        if isinstance(obj, (datetime, date)):
+            return obj.isoformat()
+        return super().default(obj)
 
 
 # @router.get("/{id}", response_model=SDeals, summary="Получить материал по ID")
@@ -112,43 +124,10 @@ async def get_deal_with_relations(id: str):
     if not result:
         raise HTTPException(status_code=404, detail="Deal not found")
 
-    deal_data = convert_for_serialization(result[0])
-    return deal_data
+    json_str = json.dumps(result[0], cls=CustomJSONEncoder, default=str)
+    deal_data = json.loads(json_str)
 
-
-def convert_for_serialization(obj):
-    """
-    Рекурсивно конвертирует все ObjectId и другие несериализуемые типы
-    """
-    if obj is None:
-        return None
-
-    if isinstance(obj, ObjectId):
-        return str(obj)
-
-    if isinstance(obj, (datetime, date)):
-        return obj.isoformat()
-
-    if isinstance(obj, dict):
-        return {key: convert_for_serialization(value) for key, value in obj.items()}
-
-    if isinstance(obj, list):
-        return [convert_for_serialization(item) for item in obj]
-
-    # Для других типов возвращаем как есть
-    return obj
-
-
-def convert_objectids_to_str(data):
-    """Рекурсивно конвертирует все ObjectId в строки"""
-    if isinstance(data, dict):
-        return {k: convert_objectids_to_str(v) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [convert_objectids_to_str(item) for item in data]
-    elif isinstance(data, ObjectId):
-        return str(data)
-    else:
-        return data
+    return JSONResponse(content=deal_data)
 
 
 @router.get("/admin/get",
