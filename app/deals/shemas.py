@@ -139,12 +139,3 @@ class SDealsWithRelations(SDeals):
     shipping_address: Optional[dict] = None
     delivery_address: Optional[dict] = None
     user: Optional[dict] = None
-
-    @field_validator("id", mode="before")
-    def convert_objectid(cls, v):
-        if isinstance(v, ObjectId):
-            return str(v)
-        return v
-
-    class Config:
-        json_encoders = {ObjectId: str}
