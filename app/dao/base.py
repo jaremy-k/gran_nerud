@@ -82,6 +82,15 @@ class MongoDAO:
             cursor = cursor.skip(skip).limit(limit)
             items = [doc async for doc in cursor]
 
+            # Конвертируем ObjectId в строки для сериализации
+            for item in items:
+                if '_id' in item and isinstance(item['_id'], ObjectId):
+                    item['_id'] = str(item['_id'])
+                # Также конвертируем другие ObjectId поля если нужно
+                for key, value in item.items():
+                    if isinstance(value, ObjectId):
+                        item[key] = str(value)
+
             # Вычисляем метаданные пагинации
             page = (skip // limit) + 1 if limit > 0 else 1
             total_pages = (total + limit - 1) // limit if limit > 0 else 1
@@ -100,7 +109,6 @@ class MongoDAO:
 
         except Exception as e:
             logger.error(f"Error finding paginated documents: {str(e)}", exc_info=True)
-            # Возвращаем пустой результат в случае ошибки
             return PaginatedResponse(
                 items=[],
                 total=0,

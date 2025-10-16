@@ -2,8 +2,10 @@ from datetime import datetime
 from typing import Optional, Any, List
 
 from bson import ObjectId
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, field_validator, ConfigDict
 from pydantic.alias_generators import to_camel
+
+from app.base_schemas import PyObjectId, BaseMongoModel
 
 
 class PaginatedResponse(BaseModel):
@@ -15,14 +17,16 @@ class PaginatedResponse(BaseModel):
     has_next: bool
     has_prev: bool
 
-    # model_config = ConfigDict(
-    #     alias_generator=to_camel,
-    #     populate_by_name=True,
-    #     from_attributes=True,
-    # )
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+        arbitrary_types_allowed=True,
+        json_encoders={ObjectId: str}
+    )
 
 
-class PaginationParams(BaseModel):
+class PaginationParams(BaseMongoModel):
     page: int = 1
     page_size: int = 100
 
@@ -36,14 +40,13 @@ class PaginationParams(BaseModel):
 
 
 class SDeals(BaseModel):
-    id: str | None = Field(None, alias="_id")
     createdAt: datetime | None = None
-    userId: str | None = None  # менеджер
-    serviceId: str | None = None  # тпа услуги
-    customerId: str | None = None  # заказчик - из companies
-    stageId: str | None = None  # этап сделки
-    materialId: str | None = None  # материал
-    unitMeasurement: str | None = None  # единица измерения
+    userId: Optional[PyObjectId] = None  # менеджер
+    serviceId: Optional[PyObjectId] = None  # тпа услуги
+    customerId: Optional[PyObjectId] = None  # заказчик - из companies
+    stageId: Optional[PyObjectId] = None  # этап сделки
+    materialId: Optional[PyObjectId] = None  # материал
+    unitMeasurement: Optional[PyObjectId] = None  # единица измерения
 
     # финансовые параметры для расчета
     # итоговая сумма = цена продажи + цена доставки
@@ -73,22 +76,6 @@ class SDeals(BaseModel):
 
     updatedAt: datetime | None = None
     deletedAt: datetime | None = None
-
-    @field_validator("*", mode="before")
-    def convert_all_objectids(cls, v, field):
-        if isinstance(v, ObjectId):
-            return str(v)
-        # Для полей, которые могут содержать ObjectId в списке/словаре
-        if isinstance(v, list):
-            return [str(i) if isinstance(i, ObjectId) else i for i in v]
-        if isinstance(v, dict):
-            return {k: str(val) if isinstance(val, ObjectId) else val for k, val in v.items()}
-        return v
-
-    class Config:
-        json_encoders = {ObjectId: str}
-        arbitrary_types_allowed = True
-        populate_by_name = True
 
 
 class SDealsAdd(BaseModel):
