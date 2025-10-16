@@ -41,11 +41,11 @@ class PaginationParams(BaseMongoModel):
 
 class SDeals(BaseModel):
     createdAt: datetime | None = None
-    userId: Optional[PyObjectId] = None  # менеджер
-    serviceId: Optional[PyObjectId] = None  # тпа услуги
-    customerId: Optional[PyObjectId] = None  # заказчик - из companies
-    stageId: Optional[PyObjectId] = None  # этап сделки
-    materialId: Optional[PyObjectId] = None  # материал
+    userId: Optional[PyObjectId] | None = None  # менеджер
+    serviceId: Optional[PyObjectId] | None = None  # тпа услуги
+    customerId: Optional[PyObjectId] | None = None  # заказчик - из companies
+    stageId: Optional[PyObjectId] | None = None  # этап сделки
+    materialId: Optional[PyObjectId] | None = None  # материал
     unitMeasurement: str | None = None  # единица измерения
 
     # финансовые параметры для расчета
