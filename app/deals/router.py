@@ -109,20 +109,25 @@ async def get_deal_with_relations(id: str):
     ]
 
     result = await DealsDAO.aggregate(pipeline)
+
     if not result:
         raise HTTPException(status_code=404, detail="Deal not found")
 
-    return result[0]
+    deal_data = convert_objectids_to_str(result[0])
 
-    # def convert_ids(data):
-    #     if isinstance(data, dict):
-    #         return {k: str(v) if isinstance(v, ObjectId) else convert_ids(v)
-    #                 for k, v in data.items()}
-    #     elif isinstance(data, list):
-    #         return [convert_ids(item) for item in data]
-    #     return data
-    #
-    # return convert_ids(result[0])
+    return deal_data
+
+
+def convert_objectids_to_str(data):
+    """Рекурсивно конвертирует все ObjectId в строки"""
+    if isinstance(data, dict):
+        return {k: convert_objectids_to_str(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [convert_objectids_to_str(item) for item in data]
+    elif isinstance(data, ObjectId):
+        return str(data)
+    else:
+        return data
 
 
 @router.get("/admin/get",
