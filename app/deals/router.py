@@ -2,11 +2,11 @@ from datetime import datetime
 from typing import Optional
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
 from starlette import status
 
 from app.deals.dao import DealsDAO
-from app.deals.shemas import SDeals, SDealsAdd, SDealsWithRelations
+from app.deals.shemas import SDeals, SDealsAdd, SDealsWithRelations, PaginatedResponse, PaginationParams
 from app.logger import logger
 from app.users.dependencies import get_current_user, get_current_admin_user
 
@@ -22,11 +22,30 @@ async def get_deal(id: str, user=Depends(get_current_user)) -> SDeals:
     return result
 
 
-@router.get("", response_model=list[SDeals], summary="Получить список материалов")
-async def get_deals(data: SDeals = Depends(), user=Depends(get_current_user)) -> list[
-    SDeals]:
+@router.get("", response_model=PaginatedResponse, summary="Получить список материалов")
+async def get_deals(
+        pagination: PaginationParams = Depends(),
+        sort_by: Optional[str] = Query(None, description="Поле для сортировки"),
+        sort_order: Optional[str] = Query("asc", regex="^(asc|desc)$", description="Порядок сортировки"),
+        data: SDeals = Depends(),
+        user=Depends(get_current_user)
+) -> PaginatedResponse:
     data.userId = ObjectId(user.id)
-    result = await DealsDAO.find_all(**data.model_dump(exclude_none=True))
+
+    # Подготавливаем параметры сортировки
+    sort = None
+    if sort_by:
+        order = 1 if sort_order == "asc" else -1
+        sort = [(sort_by, order)]
+
+    # Используем пагинированный запрос
+    result = await DealsDAO.find_paginated(
+        **data.model_dump(exclude_none=True),
+        skip=pagination.skip,
+        limit=pagination.limit,
+        sort=sort
+    )
+
     return result
 
 

@@ -1,12 +1,11 @@
 import re
-from datetime import datetime
 from typing import Optional, Dict, List, Any, Union
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorCollection
-from pymongo import ReturnDocument
-from pymongo.results import InsertManyResult, DeleteResult, UpdateResult, InsertOneResult
+from pymongo.results import InsertManyResult, DeleteResult, UpdateResult
 
+from app.deals.shemas import PaginatedResponse
 from app.logger import logger
 
 
@@ -55,6 +54,62 @@ class MongoDAO:
         except Exception as e:
             logger.error(f"Error finding documents: {str(e)}", exc_info=True)
             return []
+
+    @classmethod
+    async def find_paginated(
+            cls,
+            filter_by: Optional[Dict] = None,
+            projection: Optional[Dict] = None,
+            skip: int = 0,
+            limit: int = 100,
+            sort: Optional[List[tuple]] = None,
+            **kwargs,
+    ) -> PaginatedResponse:
+        """Find documents with pagination metadata."""
+        try:
+            query = filter_by or {}
+            query.update(kwargs)
+
+            # Получаем общее количество документов
+            total = await cls.collection.count_documents(query)
+
+            # Получаем данные с пагинацией
+            cursor = cls.collection.find(query, projection)
+
+            if sort:
+                cursor = cursor.sort(sort)
+
+            cursor = cursor.skip(skip).limit(limit)
+            items = [doc async for doc in cursor]
+
+            # Вычисляем метаданные пагинации
+            page = (skip // limit) + 1 if limit > 0 else 1
+            total_pages = (total + limit - 1) // limit if limit > 0 else 1
+            has_next = page < total_pages
+            has_prev = page > 1
+
+            return PaginatedResponse(
+                items=items,
+                total=total,
+                page=page,
+                page_size=limit,
+                total_pages=total_pages,
+                has_next=has_next,
+                has_prev=has_prev
+            )
+
+        except Exception as e:
+            logger.error(f"Error finding paginated documents: {str(e)}", exc_info=True)
+            # Возвращаем пустой результат в случае ошибки
+            return PaginatedResponse(
+                items=[],
+                total=0,
+                page=1,
+                page_size=limit,
+                total_pages=0,
+                has_next=False,
+                has_prev=False
+            )
 
     @classmethod
     async def aggregate(cls, pipeline: List[Dict]) -> List[Dict[str, Any]]:
