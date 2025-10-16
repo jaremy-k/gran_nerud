@@ -105,17 +105,68 @@ async def get_deal_with_relations(id: str):
             "shipping_address": {"$arrayElemAt": ["$shipping_address", 0]},
             "delivery_address": {"$arrayElemAt": ["$delivery_address", 0]},
             "user": {"$arrayElemAt": ["$user", 0]},
+        }},
+        {"$project": {
+            "_id": {"$toString": "$_id"},
+            "userId": {"$toString": "$userId"},
+            "serviceId": {"$toString": "$serviceId"},
+            "customerId": {"$toString": "$customerId"},
+            "stageId": {"$toString": "$stageId"},
+            "materialId": {"$toString": "$materialId"},
+            "unitMeasurement": 1,
+            "quantity": 1,
+            "amountPurchaseUnit": 1,
+            "amountPurchaseTotal": 1,
+            "amountSalesUnit": 1,
+            "amountSalesTotal": 1,
+            "amountDelivery": 1,
+            "companyProfit": 1,
+            "totalAmount": 1,
+            "managerProfit": 1,
+            "paymentMethod": 1,
+            "shippingAddress": 1,
+            "methodReceiving": 1,
+            "deliveryAddress": 1,
+            "deadline": 1,
+            "notes": 1,
+            "OSSIG": 1,
+            "createdAt": 1,
+            "updatedAt": 1,
+            "deletedAt": 1,
+            # Обрабатываем связанные объекты
+            "service": {
+                "_id": {"$toString": "$service._id"},
+                "name": "$service.name",
+                # добавьте другие поля service по необходимости
+            },
+            "customer": {
+                "_id": {"$toString": "$customer._id"},
+                "name": "$customer.name",
+                # добавьте другие поля customer по необходимости
+            },
+            "stage": {
+                "_id": {"$toString": "$stage._id"},
+                "name": "$stage.name",
+                # добавьте другие поля stage по необходимости
+            },
+            "material": {
+                "_id": {"$toString": "$material._id"},
+                "name": "$material.name",
+                # добавьте другие поля material по необходимости
+            },
+            "user": {
+                "_id": {"$toString": "$user._id"},
+                "name": "$user.name",
+                # добавьте другие поля user по необходимости
+            }
         }}
     ]
 
     result = await DealsDAO.aggregate(pipeline)
-
     if not result:
         raise HTTPException(status_code=404, detail="Deal not found")
 
-    deal_data = convert_objectids_to_str(result[0])
-
-    return deal_data
+    return result[0]
 
 
 def convert_objectids_to_str(data):
