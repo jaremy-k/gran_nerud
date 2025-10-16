@@ -25,8 +25,8 @@ async def get_deal(id: str, user=Depends(get_current_user)) -> SDeals:
 @router.get("", response_model=PaginatedResponse, summary="Получить список материалов")
 async def get_deals(
         pagination: PaginationParams = Depends(),
-        sort_by: Optional[str] = Query(None, description="Поле для сортировки"),
-        sort_order: Optional[str] = Query("asc", regex="^(asc|desc)$", description="Порядок сортировки"),
+        sortBy: Optional[str] = Query(None, description="Поле для сортировки"),
+        sortOrder: Optional[str] = Query("asc", regex="^(asc|desc)$", description="Порядок сортировки"),
         data: SDeals = Depends(),
         user=Depends(get_current_user)
 ) -> PaginatedResponse:
@@ -34,9 +34,9 @@ async def get_deals(
 
     # Подготавливаем параметры сортировки
     sort = None
-    if sort_by:
-        order = 1 if sort_order == "asc" else -1
-        sort = [(sort_by, order)]
+    if sortBy:
+        order = 1 if sortOrder == "asc" else -1
+        sort = [(sortBy, order)]
 
     # Используем пагинированный запрос
     result = await DealsDAO.find_paginated(
