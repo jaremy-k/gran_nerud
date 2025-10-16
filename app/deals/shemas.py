@@ -46,7 +46,7 @@ class SDeals(BaseModel):
     customerId: Optional[PyObjectId] = None  # заказчик - из companies
     stageId: Optional[PyObjectId] = None  # этап сделки
     materialId: Optional[PyObjectId] = None  # материал
-    unitMeasurement: Optional[PyObjectId] = None  # единица измерения
+    unitMeasurement: str | None = None  # единица измерения
 
     # финансовые параметры для расчета
     # итоговая сумма = цена продажи + цена доставки
