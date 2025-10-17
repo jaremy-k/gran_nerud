@@ -77,6 +77,21 @@ class SDeals(BaseModel):
     updatedAt: datetime | None = None
     deletedAt: datetime | None = None
 
+    @field_validator('userId', 'serviceId', 'customerId', 'stageId', 'materialId', mode='before')
+    @classmethod
+    def convert_objectid_to_str(cls, v):
+        """Конвертирует ObjectId в строку перед валидацией"""
+        if isinstance(v, ObjectId):
+            return str(v)
+        return v
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        json_encoders={ObjectId: str},
+        from_attributes=True,
+        populate_by_name=True
+    )
+
 
 class SDealsAdd(BaseModel):
     createdAt: datetime | None = None
