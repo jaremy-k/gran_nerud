@@ -40,11 +40,15 @@ async def get_deals(
         sortBy: Optional[str] = Query(None, description="Поле для сортировки"),
         sortOrder: Optional[str] = Query("asc", regex="^(asc|desc)$", description="Порядок сортировки"),
         includeRelations: bool = Query(False, description="Включать связанные объекты"),  # Новый параметр
+        includeDeleted: bool = Query(False, description="(deletedAt = null)"),
         data: SDeals = Depends(),
         user=Depends(get_current_user)
 ) -> PaginatedResponse:
     data.userId = ObjectId(user.id)
     filter_data = data.model_dump(exclude_none=True)
+
+    if not includeDeleted:
+        filter_data["deletedAt"] = None
 
     # Подготавливаем параметры сортировки
     sort = None
