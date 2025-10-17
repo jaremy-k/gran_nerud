@@ -39,10 +39,12 @@ async def get_deals(
         pagination: PaginationParams = Depends(),
         sortBy: Optional[str] = Query(None, description="Поле для сортировки"),
         sortOrder: Optional[str] = Query("asc", regex="^(asc|desc)$", description="Порядок сортировки"),
+        include_relations: bool = Query(False, description="Включать связанные объекты"),  # Новый параметр
         data: SDeals = Depends(),
         user=Depends(get_current_user)
 ) -> PaginatedResponse:
     data.userId = ObjectId(user.id)
+    filter_data = data.model_dump(exclude_none=True)
 
     # Подготавливаем параметры сортировки
     sort = None
@@ -50,12 +52,13 @@ async def get_deals(
         order = 1 if sortOrder == "asc" else -1
         sort = [(sortBy, order)]
 
-    # Используем пагинированный запрос
+    # Используем пагинированный запрос с опциональными связями
     result = await DealsDAO.find_paginated(
-        **data.model_dump(exclude_none=True),
+        filter_by=filter_data,
         skip=pagination.skip,
         limit=pagination.limit,
-        sort=sort
+        sort=sort,
+        include_relations=include_relations  # Передаем параметр
     )
 
     return result
