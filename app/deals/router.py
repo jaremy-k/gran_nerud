@@ -39,7 +39,7 @@ async def get_deals(
         pagination: PaginationParams = Depends(),
         sortBy: Optional[str] = Query(None, description="Поле для сортировки"),
         sortOrder: Optional[str] = Query("asc", regex="^(asc|desc)$", description="Порядок сортировки"),
-        include_relations: bool = Query(False, description="Включать связанные объекты"),  # Новый параметр
+        includeRelations: bool = Query(False, description="Включать связанные объекты"),  # Новый параметр
         data: SDeals = Depends(),
         user=Depends(get_current_user)
 ) -> PaginatedResponse:
@@ -58,7 +58,7 @@ async def get_deals(
         skip=pagination.skip,
         limit=pagination.limit,
         sort=sort,
-        include_relations=include_relations  # Передаем параметр
+        include_relations=includeRelations  # Передаем параметр
     )
 
     return result
