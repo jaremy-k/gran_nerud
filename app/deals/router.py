@@ -43,8 +43,21 @@ async def get_deals(
         data: SDeals = Depends(),
         user=Depends(get_current_user)
 ) -> PaginatedResponse:
-    data.userId = ObjectId(user.id)
+    # data.userId = ObjectId(user.id)
+    # filter_data = data.model_dump(exclude_none=True)
+
+    # Конвертируем данные в словарь и обрабатываем ObjectId
     filter_data = data.model_dump(exclude_none=True)
+    filter_data['userId'] = ObjectId(user.id)
+
+    # Конвертируем строковые ID в ObjectId для фильтрации
+    for field in ['serviceId', 'customerId', 'stageId', 'materialId']:
+        if field in filter_data and filter_data[field]:
+            try:
+                filter_data[field] = ObjectId(filter_data[field])
+            except:
+                # Если невалидный ObjectId, удаляем из фильтра
+                del filter_data[field]
 
     # Подготавливаем параметры сортировки
     sort = None
