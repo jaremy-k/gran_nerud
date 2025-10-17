@@ -40,7 +40,7 @@ async def get_deals(
         sortBy: Optional[str] = Query(None, description="Поле для сортировки"),
         sortOrder: Optional[str] = Query("asc", regex="^(asc|desc)$", description="Порядок сортировки"),
         includeRelations: bool = Query(False, description="Включать связанные объекты"),  # Новый параметр
-        data: SDeals = Depends(),
+        data: SDealsAdd = Depends(),
         user=Depends(get_current_user)
 ) -> PaginatedResponse:
     data.userId = ObjectId(user.id)
