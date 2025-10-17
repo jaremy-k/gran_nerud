@@ -53,7 +53,7 @@ async def get_deals(
         sort = [(sortBy, order)]
 
     # Используем пагинированный запрос с опциональными связями
-    result = await DealsDAO.find_paginated(
+    result = await DealsDAO.find_paginated1(
         filter_by=filter_data,
         skip=pagination.skip,
         limit=pagination.limit,

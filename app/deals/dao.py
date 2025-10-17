@@ -12,7 +12,7 @@ class DealsDAO(MongoDAO):
     collection = database_mongo["deals"]
 
     @classmethod
-    async def find_paginated(
+    async def find_paginated1(
             cls,
             filter_by: Optional[Dict] = None,
             projection: Optional[Dict] = None,
