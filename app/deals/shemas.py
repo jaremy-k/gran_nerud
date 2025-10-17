@@ -77,6 +77,41 @@ class SDeals(BaseModel):
     updatedAt: datetime | None = None
     deletedAt: datetime | None = None
 
+    @field_validator('userId', 'serviceId', 'customerId', 'stageId', 'materialId', mode='before')
+    @classmethod
+    def validate_and_convert_objectid(cls, v):
+        """
+        Валидатор для полей ObjectId.
+        Принимает строки, ObjectId или None, конвертирует в ObjectId.
+        """
+        if v is None or v == "":
+            return None
+
+        # Если уже ObjectId - возвращаем как есть
+        if isinstance(v, ObjectId):
+            return v
+
+        # Если строка - пробуем конвертировать в ObjectId
+        if isinstance(v, str):
+            try:
+                if ObjectId.is_valid(v):
+                    return ObjectId(v)
+                else:
+                    # Если невалидный ObjectId, возвращаем None
+                    return None
+            except:
+                return None
+
+        # Для других типов возвращаем как есть (вызовет ошибку валидации)
+        return v
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        json_encoders={ObjectId: str},
+        from_attributes=True,
+        populate_by_name=True
+    )
+
 
 class SDealsAdd(BaseModel):
     createdAt: datetime | None = None

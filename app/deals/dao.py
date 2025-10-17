@@ -19,7 +19,7 @@ class DealsDAO(MongoDAO):
             skip: int = 0,
             limit: int = 100,
             sort: Optional[List[tuple]] = None,
-            include_relations: bool = False,  # Новый параметр для включения связей
+            include_relations: bool = False,  # Новый параметр
             **kwargs,
     ) -> PaginatedResponse:
         """Find documents with pagination metadata."""
