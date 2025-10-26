@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, field_validator
 class SStages(BaseModel):
     id: str | None = Field(None, alias="_id")
     name: str | None = None
+    order: int | None = None
     deleted_at: datetime | None = None
     is_deleted: bool | None = None
 
