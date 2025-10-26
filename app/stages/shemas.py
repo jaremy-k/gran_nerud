@@ -22,6 +22,7 @@ class SStages(BaseModel):
 
 class SStagesAdd(BaseModel):
     name: str | None = None
+    order: int | None = None
 
     class Config:
         json_encoders = {ObjectId: str}

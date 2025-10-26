@@ -24,7 +24,7 @@ async def get_material(id: str) -> SMaterials:
 @router.get("", response_model=list[SMaterials], summary="Получить список материалов")
 async def get_materials(data: SMaterials = Depends()) -> list[
     SMaterials]:
-    result = await MaterialsDAO.find_all(**data.model_dump(exclude_none=True))
+    result = await MaterialsDAO.find_all(**data.model_dump(exclude_none=True), sort=[('name', 1)])
     return result
 
 

@@ -25,7 +25,7 @@ async def get_material(id: str) -> SStages:
 @router.get("", response_model=list[SStages], summary="Получить список материалов")
 async def get_materials(data: SStages = Depends()) -> list[
     SStages]:
-    result = await StagesDAO.find_all(**data.model_dump(exclude_none=True))
+    result = await StagesDAO.find_all(**data.model_dump(exclude_none=True), sort=[('order', 1)])
     return result
 
 
