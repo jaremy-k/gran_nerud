@@ -65,6 +65,9 @@ class SDeals(BaseModel):
     ndsPercent: float | None = None  # процент НДС
 
     totalAmount: float | None = None  # общая сумма для заказчика (цена продажи + цена доставки) (динамическая)
+
+    addExpenses: List[dict] | None = None  # дополнительные расходы (формат [{name: str, amount: float}])
+    
     managerProfit: float | None = None  # процент менеджеру (процент менеджера * маржа фирмы) (динамическое)
 
     paymentMethod: str | None = None  # способ оплаты заказчиком (нал, без нал)
