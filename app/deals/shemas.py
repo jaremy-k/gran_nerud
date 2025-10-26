@@ -61,6 +61,9 @@ class SDeals(BaseModel):
     amountDelivery: float | None = None  # цена доставки (вручную)
     companyProfit: float | None = None  # маржа фирмы (цена продажи - цена закупки - цена доставка) (динамическая)
 
+    ndsAmount: float | None = None  # сумма НДС
+    ndsPercent: float | None = None  # процент НДС
+
     totalAmount: float | None = None  # общая сумма для заказчика (цена продажи + цена доставки) (динамическая)
     managerProfit: float | None = None  # процент менеджеру (процент менеджера * маржа фирмы) (динамическое)
 
