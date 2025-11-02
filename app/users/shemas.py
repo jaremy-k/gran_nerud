@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from bson import ObjectId
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, computed_field
 
 
 class SUsersAuth(BaseModel):
@@ -30,7 +30,11 @@ class SUsersGet(BaseModel):
     admin: bool | None = False
     hashed_password: str | None = None
     deletedAt: datetime | None = None
-    isDeleted: bool | None = None
+
+    @computed_field
+    @property
+    def isDeleted(self) -> bool:
+        return self.deletedAt is not None
 
     @field_validator("id", mode="before")
     def convert_objectid(cls, v):
@@ -52,7 +56,11 @@ class SUsersGetResponse(BaseModel):
     profit: dict | None = None
     admin: bool | None = False
     deletedAt: datetime | None = None
-    isDeleted: bool | None = None
+
+    @computed_field
+    @property
+    def isDeleted(self) -> bool:
+        return self.deletedAt is not None
 
     @field_validator("id", mode="before")
     def convert_objectid(cls, v):
