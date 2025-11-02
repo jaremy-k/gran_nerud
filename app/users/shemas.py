@@ -27,7 +27,7 @@ class SUsersGet(BaseModel):
     fatherName: str | None = None
     email: str | None = None
     profit: dict | None = None
-    admin: bool | None = None
+    admin: bool | None = False
     hashed_password: str | None = None
     deletedAt: datetime | None = None
     isDeleted: bool | None = None
