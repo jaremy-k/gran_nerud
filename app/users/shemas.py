@@ -26,6 +26,7 @@ class SUsersGet(BaseModel):
     lastName: str | None = None
     fatherName: str | None = None
     email: str | None = None
+    profit: dict | None = None
     admin: bool | None = None
     hashed_password: str | None = None
     deleted_at: datetime | None = None
