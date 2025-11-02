@@ -59,18 +59,16 @@ class SDeals(BaseModel):
     amountSalesTotal: float | None = None  # цена закупки (количество * цена за единицу) - динамическое
 
     amountDelivery: float | None = None  # цена доставки (вручную)
+
     companyProfit: float | None = None  # маржа фирмы (цена продажи - цена закупки - цена доставка) (динамическая)
-
-    ndsAmount: float | None = None  # сумма НДС
-    ndsPercent: float | None = None  # процент НДС
-
-    totalAmount: float | None = None  # общая сумма для заказчика (цена продажи + цена доставки) (динамическая)
-
-    addExpenses: List[dict] | None = None  # дополнительные расходы (формат [{name: str, amount: float}])
-    
     managerProfit: float | None = None  # процент менеджеру (процент менеджера * маржа фирмы) (динамическое)
 
     paymentMethod: str | None = None  # способ оплаты заказчиком (нал, без нал)
+    ndsPercent: float | None = None  # процент НДС
+    totalAmount: float | None = None  # общая сумма для заказчика (цена продажи + цена доставки) (динамическая)
+
+    addExpenses: List[dict] | None = None  # дополнительные расходы (формат [{name: str, amount: float}])
+
     # адреса
     shippingAddress: str | None = None  # адрес откгрузки (откуда будут забирать товар)
     methodReceiving: str | None = None  # способ получения (доставка, самовывоз)
@@ -101,11 +99,11 @@ class SDeals(BaseModel):
 
 class SDealsAdd(BaseModel):
     createdAt: datetime | None = None
-    userId: str | None = None  # менеджер
-    serviceId: str | None = None  # тпа услуги
-    customerId: str | None = None  # заказчик - из companies
-    stageId: str | None = None  # этап сделки
-    materialId: str | None = None  # материал
+    userId: Optional[PyObjectId] | None = None  # менеджер
+    serviceId: Optional[PyObjectId] | None = None  # тпа услуги
+    customerId: Optional[PyObjectId] | None = None  # заказчик - из companies
+    stageId: Optional[PyObjectId] | None = None  # этап сделки
+    materialId: Optional[PyObjectId] | None = None  # материал
     unitMeasurement: str | None = None  # единица измерения
 
     # финансовые параметры для расчета
@@ -119,12 +117,16 @@ class SDealsAdd(BaseModel):
     amountSalesTotal: float | None = None  # цена закупки (количество * цена за единицу) - динамическое
 
     amountDelivery: float | None = None  # цена доставки (вручную)
-    companyProfit: float | None = None  # маржа фирмы (цена продажи - цена закупки - цена доставка) (динамическая)
 
-    totalAmount: float | None = None  # общая сумма для заказчика (цена продажи + цена доставки) (динамическая)
+    companyProfit: float | None = None  # маржа фирмы (цена продажи - цена закупки - цена доставка) (динамическая)
     managerProfit: float | None = None  # процент менеджеру (процент менеджера * маржа фирмы) (динамическое)
 
     paymentMethod: str | None = None  # способ оплаты заказчиком (нал, без нал)
+    ndsPercent: float | None = None  # процент НДС
+    totalAmount: float | None = None  # общая сумма для заказчика (цена продажи + цена доставки) (динамическая)
+
+    addExpenses: List[dict] | None = None  # дополнительные расходы (формат [{name: str, amount: float}])
+
     # адреса
     shippingAddress: str | None = None  # адрес откгрузки (откуда будут забирать товар)
     methodReceiving: str | None = None  # способ получения (доставка, самовывоз)
