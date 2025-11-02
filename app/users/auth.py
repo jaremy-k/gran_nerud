@@ -4,7 +4,6 @@ from pydantic import EmailStr
 from jose import jwt
 
 from app.config import settings
-from app.logger import logger
 from app.users.dao import UsersDAO
 from app.users.shemas import SUsersGet
 

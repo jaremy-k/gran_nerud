@@ -41,3 +41,25 @@ class SUsersGet(BaseModel):
     class Config:
         from_attributes = True
         populate_by_name = True
+
+
+class SUsersGetResponse(BaseModel):
+    id: str | None = Field(None, alias="_id")
+    name: str | None = None
+    lastName: str | None = None
+    fatherName: str | None = None
+    email: str | None = None
+    profit: dict | None = None
+    admin: bool | None = False
+    deletedAt: datetime | None = None
+    isDeleted: bool | None = None
+
+    @field_validator("id", mode="before")
+    def convert_objectid(cls, v):
+        if isinstance(v, ObjectId):
+            return str(v)
+        return v
+
+    class Config:
+        from_attributes = True
+        populate_by_name = True
