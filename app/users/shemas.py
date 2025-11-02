@@ -29,8 +29,8 @@ class SUsersGet(BaseModel):
     profit: dict | None = None
     admin: bool | None = None
     hashed_password: str | None = None
-    deleted_at: datetime | None = None
-    is_deleted: bool | None = None
+    deletedAt: datetime | None = None
+    isDeleted: bool | None = None
 
     @field_validator("id", mode="before")
     def convert_objectid(cls, v):
