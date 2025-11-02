@@ -123,6 +123,7 @@ class SDealsAdd(BaseModel):
 
     paymentMethod: str | None = None  # способ оплаты заказчиком (нал, без нал)
     ndsPercent: float | None = None  # процент НДС
+    ndsAmount: float  # сумма НДС
     totalAmount: float | None = None  # общая сумма для заказчика (цена продажи + цена доставки) (динамическая)
 
     addExpenses: List[dict] | None = None  # дополнительные расходы (формат [{name: str, amount: float}])
