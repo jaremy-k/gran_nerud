@@ -6,10 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from starlette import status
 
 from app.companies.dao import CompaniesDAO
+from app.companies.get_company_info import parse_company_data
 from app.companies.shemas import SCompanies, SCompaniesAdd
 from app.config import settings
 from app.logger import logger
-from app.users.dependencies import get_current_admin_user
 
 router = APIRouter(
     prefix="/companies",
@@ -37,7 +37,8 @@ async def get_company_info(inn: int):
                   'key': settings.API_FNS_KEY}
         result = requests.get(url=settings.API_FNS_URL, params=params)
         logger.info(f"Company info: {result.text}")
-        return result.json()
+        result = parse_company_data(result.json())
+        return result
     except Exception as e:
         logger.error(f"Ошибка при получении данных о компании: {str(e)}", exc_info=True)
         raise HTTPException(
@@ -242,27 +243,27 @@ async def safe_delete_material(
                 )
 
         # Софт-удаление (помечаем как удаленный)
-        result = await CompaniesDAO.soft_delete(id)
-
-        if not result:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Не удалось удалить материал"
-            )
-
-        # Логирование в фоне
-        background_tasks.add_task(
-            logger.info,
-            "Material safely deleted: id=%s", id,
-            extra={
-                'material_id': id,
-                'action': 'safe_delete',
-                'deleted_by': 'system',  # Можно добавить auth пользователя
-                'dependencies_checked': check_dependencies
-            }
-        )
-
-        return result
+        # result = await CompaniesDAO.soft_delete(id)  # TODO soft_delete metdde in DAO
+        #
+        # if not result:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #         detail="Не удалось удалить материал"
+        #     )
+        #
+        # # Логирование в фоне
+        # background_tasks.add_task(
+        #     logger.info,
+        #     "Material safely deleted: id=%s", id,
+        #     extra={
+        #         'material_id': id,
+        #         'action': 'safe_delete',
+        #         'deleted_by': 'system',  # Можно добавить auth пользователя
+        #         'dependencies_checked': check_dependencies
+        #     }
+        # )
+        #
+        # return result
 
     except HTTPException:
         raise
