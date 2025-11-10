@@ -10,7 +10,7 @@ class SCompanies(BaseModel):
     id: str | None = Field(None, alias="_id")
     name: str | None = None
     abbreviatedName: str | None = None
-    inn: int | None = None
+    inn: str | int | None = None
     contacts: List[dict] | None = None
     type: str | None = None
     deleted_at: datetime | None = None
@@ -30,7 +30,7 @@ class SCompanies(BaseModel):
 class SCompaniesAdd(BaseModel):
     name: str | None = None
     abbreviatedName: str | None = None
-    inn: int | None = None
+    inn: int | str | None = None
     contacts: List[dict] | None = None
     type: str | None = None
     deleted_at: datetime | None = None
