@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, Any, List
 
 from bson import ObjectId
-from pydantic import BaseModel, field_validator, ConfigDict
+from pydantic import BaseModel, field_validator, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
 from app.base_schemas import PyObjectId, BaseMongoModel
@@ -41,42 +41,49 @@ class PaginationParams(BaseMongoModel):
 
 class SDeals(BaseModel):
     createdAt: datetime | None = None
-    userId: Optional[PyObjectId] | None = None  # менеджер
-    serviceId: Optional[PyObjectId] | None = None  # тпа услуги
-    customerId: Optional[PyObjectId] | None = None  # заказчик - из companies
-    stageId: Optional[PyObjectId] | None = None  # этап сделки
-    materialId: Optional[PyObjectId] | None = None  # материал
-    unitMeasurement: str | None = None  # единица измерения
+    userId: Optional[PyObjectId] | None = Field(None, description='менеджер')
+    serviceId: Optional[PyObjectId] | None = Field(None, description='тпа услуги')
+    customerId: Optional[PyObjectId] | None = Field(None, description='заказчик - из companies')
+    stageId: Optional[PyObjectId] | None = Field(None, description='этап сделки')
+    materialId: Optional[PyObjectId] | None = Field(None, description='материал')
+    unitMeasurement: str | None = Field(None, description='единица измерения')
 
     # финансовые параметры для расчета
     # итоговая сумма = цена продажи + цена доставки
-    quantity: float | None = None  # количество материала (вручную)
+    quantity: float | None = Field(None, description='количество материала (вручную)')
 
-    amountPurchaseUnit: float | None = None  # цена за единицу товара (вручную)
-    amountPurchaseTotal: float | None = None  # цена закупки (количество * цена за единицу) - динамическое
+    amountPurchaseUnit: float | None = Field(None, description='цена за единицу товара (вручную)')
+    amountPurchaseTotal: float | None = Field(None,
+                                              description='цена закупки (количество * цена за единицу) - динамическое')
 
-    amountSalesUnit: float | None = None  # цена за единицу товара (вручную)
-    amountSalesTotal: float | None = None  # цена закупки (количество * цена за единицу) - динамическое
+    amountSalesUnit: float | None = Field(None, description='цена за единицу товара (вручную)')
+    amountSalesTotal: float | None = Field(None,
+                                           description='цена закупки (количество * цена за единицу) - динамическое')
 
-    amountDelivery: float | None = None  # цена доставки (вручную)
+    amountDelivery: float | None = Field(None, description='цена доставки (вручную)')
 
-    companyProfit: float | None = None  # маржа фирмы (цена продажи - цена закупки - цена доставка) (динамическая)
-    managerProfit: float | None = None  # процент менеджеру (процент менеджера * маржа фирмы) (динамическое)
+    companyProfit: float | None = Field(None,
+                                        description='маржа фирмы (цена продажи - цена закупки - цена доставка) (динамическая)')
+    managerProfit: float | None = Field(None,
+                                        description='процент менеджеру (процент менеджера * маржа фирмы) (динамическое)')
 
-    paymentMethod: str | None = None  # способ оплаты заказчиком (нал, без нал)
-    ndsPercent: float | None = None  # процент НДС
-    totalAmount: float | None = None  # общая сумма для заказчика (цена продажи + цена доставки) (динамическая)
+    paymentMethod: str | None = Field(None, description='способ оплаты заказчиком (нал, без нал)')
+    ndsPercent: float | None = Field(None, description='процент НДС')
+    ndsAmount: float | None = Field(None, description='мма НДС')
+    totalAmount: float | None = Field(None,
+                                      description='общая сумма для заказчика (цена продажи + цена доставки) (динамическая)')
 
-    addExpenses: List[dict] | None = None  # дополнительные расходы (формат [{name: str, amount: float}])
+    addExpenses: List[dict] | None = Field(None,
+                                           description='дополнительные расходы (формат [{name: str, amount: float}])')
 
     # адреса
-    shippingAddress: str | None = None  # адрес откгрузки (откуда будут забирать товар)
-    methodReceiving: str | None = None  # способ получения (доставка, самовывоз)
-    deliveryAddress: str | None = None  # адрес доставка (куда доставить товар)
+    shippingAddress: str | None = Field(None, description='адрес откгрузки (откуда будут забирать товар)')
+    methodReceiving: str | None = Field(None, description='способ получения (доставка, самовывоз)')
+    deliveryAddress: str | None = Field(None, description='адрес доставка (куда доставить товар)')
 
-    deadline: datetime | None = None  # срок к которому надо завершить заказ
-    notes: str | None = None
-    OSSIG: bool | None = None  # это для утилизации
+    deadline: datetime | None = Field(None, description='срок к которому надо завершить заказ')
+    notes: str | None = Field(None, description='заметки')
+    OSSIG: bool | None = Field(None, description='это для утилизации')
 
     updatedAt: datetime | None = None
     deletedAt: datetime | None = None
@@ -99,43 +106,49 @@ class SDeals(BaseModel):
 
 class SDealsAdd(BaseModel):
     createdAt: datetime | None = None
-    userId: Optional[PyObjectId] | None = None  # менеджер
-    serviceId: Optional[PyObjectId] | None = None  # тпа услуги
-    customerId: Optional[PyObjectId] | None = None  # заказчик - из companies
-    stageId: Optional[PyObjectId] | None = None  # этап сделки
-    materialId: Optional[PyObjectId] | None = None  # материал
-    unitMeasurement: str | None = None  # единица измерения
+    userId: Optional[PyObjectId] | None = Field(None, description='менеджер')
+    serviceId: Optional[PyObjectId] | None = Field(None, description='тпа услуги')
+    customerId: Optional[PyObjectId] | None = Field(None, description='заказчик - из companies')
+    stageId: Optional[PyObjectId] | None = Field(None, description='этап сделки')
+    materialId: Optional[PyObjectId] | None = Field(None, description='материал')
+    unitMeasurement: str | None = Field(None, description='единица измерения')
 
     # финансовые параметры для расчета
     # итоговая сумма = цена продажи + цена доставки
-    quantity: float | None = None  # количество материала (вручную)
+    quantity: float | None = Field(None, description='количество материала (вручную)')
 
-    amountPurchaseUnit: float | None = None  # цена за единицу товара (вручную)
-    amountPurchaseTotal: float | None = None  # цена закупки (количество * цена за единицу) - динамическое
+    amountPurchaseUnit: float | None = Field(None, description='цена за единицу товара (вручную)')
+    amountPurchaseTotal: float | None = Field(None,
+                                              description='цена закупки (количество * цена за единицу) - динамическое')
 
-    amountSalesUnit: float | None = None  # цена за единицу товара (вручную)
-    amountSalesTotal: float | None = None  # цена закупки (количество * цена за единицу) - динамическое
+    amountSalesUnit: float | None = Field(None, description='цена за единицу товара (вручную)')
+    amountSalesTotal: float | None = Field(None,
+                                           description='цена закупки (количество * цена за единицу) - динамическое')
 
-    amountDelivery: float | None = None  # цена доставки (вручную)
+    amountDelivery: float | None = Field(None, description='цена доставки (вручную)')
 
-    companyProfit: float | None = None  # маржа фирмы (цена продажи - цена закупки - цена доставка) (динамическая)
-    managerProfit: float | None = None  # процент менеджеру (процент менеджера * маржа фирмы) (динамическое)
+    companyProfit: float | None = Field(None,
+                                        description='маржа фирмы (цена продажи - цена закупки - цена доставка) (динамическая)')
+    managerProfit: float | None = Field(None,
+                                        description='процент менеджеру (процент менеджера * маржа фирмы) (динамическое)')
 
-    paymentMethod: str | None = None  # способ оплаты заказчиком (нал, без нал)
-    ndsPercent: float | None = None  # процент НДС
-    ndsAmount: float  # сумма НДС
-    totalAmount: float | None = None  # общая сумма для заказчика (цена продажи + цена доставки) (динамическая)
+    paymentMethod: str | None = Field(None, description='способ оплаты заказчиком (нал, без нал)')
+    ndsPercent: float | None = Field(None, description='процент НДС')
+    ndsAmount: float | None = Field(None, description='мма НДС')
+    totalAmount: float | None = Field(None,
+                                      description='общая сумма для заказчика (цена продажи + цена доставки) (динамическая)')
 
-    addExpenses: List[dict] | None = None  # дополнительные расходы (формат [{name: str, amount: float}])
+    addExpenses: List[dict] | None = Field(None,
+                                           description='дополнительные расходы (формат [{name: str, amount: float}])')
 
     # адреса
-    shippingAddress: str | None = None  # адрес откгрузки (откуда будут забирать товар)
-    methodReceiving: str | None = None  # способ получения (доставка, самовывоз)
-    deliveryAddress: str | None = None  # адрес доставка (куда доставить товар)
+    shippingAddress: str | None = Field(None, description='адрес откгрузки (откуда будут забирать товар)')
+    methodReceiving: str | None = Field(None, description='способ получения (доставка, самовывоз)')
+    deliveryAddress: str | None = Field(None, description='адрес доставка (куда доставить товар)')
 
-    deadline: datetime | None = None  # срок к которому надо завершить заказ
-    notes: str | None = None
-    OSSIG: bool | None = None  # это для утилизации
+    deadline: datetime | None = Field(None, description='срок к которому надо завершить заказ')
+    notes: str | None = Field(None, description='заметки')
+    OSSIG: bool | None = Field(None, description='это для утилизации')
 
     @field_validator(
         "serviceId", "customerId", "stageId", "materialId", "userId"
