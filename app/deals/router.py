@@ -44,8 +44,9 @@ async def get_deals(
         data: SDeals = Depends(),
         user=Depends(get_current_user)
 ) -> PaginatedResponse:
-    if not user.get('admin'):
-        data.userId = ObjectId(user.id)
+    if not hasattr(user, 'admin'):
+        if not user.admin:
+            data.userId = ObjectId(user.id)
     filter_data = data.model_dump(exclude_none=True)
 
     if not includeDeleted:
