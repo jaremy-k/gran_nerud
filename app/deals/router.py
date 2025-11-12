@@ -46,6 +46,7 @@ async def get_deals(
 ) -> PaginatedResponse:
     if not hasattr(user, 'admin'):
         if not user.admin:
+            logger.info('is_admin')
             data.userId = ObjectId(user.id)
     filter_data = data.model_dump(exclude_none=True)
 
