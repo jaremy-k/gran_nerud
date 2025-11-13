@@ -66,16 +66,17 @@ async def add_company(data: SCompaniesAdd):
     """
     try:
         # Проверка уникальности без учёта регистра и с обрезкой пробелов
-        if not await CompaniesDAO.is_unique(
-                field_name="inn",
-                value=data.inn,
-                case_sensitive=False,
-                trim_spaces=True
-        ):
-            raise HTTPException(
-                status_code=409,
-                detail="Компания с таким инн уже существует"
-            )
+        if data.inn:
+            if not await CompaniesDAO.is_unique(
+                    field_name="inn",
+                    value=data.inn,
+                    case_sensitive=False,
+                    trim_spaces=True
+            ):
+                raise HTTPException(
+                    status_code=409,
+                    detail="Компания с таким инн уже существует"
+                )
 
         # Создание
         company_data = data.model_dump(exclude_none=True)
