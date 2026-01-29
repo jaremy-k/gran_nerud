@@ -73,8 +73,8 @@ async def get_deals(
             response_model=list[SDealsWithRelations],
             summary="Получить список сделок со связанными объектами")
 async def get_deals_for_admins(data: SDeals = Depends(), user=Depends(get_current_user)):
-    if not hasattr(user, 'admin') or user.admin == False:
-        raise HTTPException(status_code=403, detail="Доступ закрыт")
+    # if not hasattr(user, 'admin') or user.admin == False:
+    #     raise HTTPException(status_code=403, detail="Доступ закрыт")
 
     pipeline = [
         {"$lookup": {
