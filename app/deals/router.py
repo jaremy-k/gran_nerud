@@ -142,7 +142,10 @@ async def get_deal_with_relations(id: str):
 @router.get("/admin/get",
             response_model=list[SDealsWithRelations],
             summary="Получить список сделок со связанными объектами")
-async def get_deals_for_admins(data: SDeals = Depends(), user=Depends(get_current_admin_user)):
+async def get_deals_for_admins(data: SDeals = Depends(), user=Depends(get_current_user)):
+    if not hasattr(user, 'admin') or user.admin == False:
+        raise HTTPException(status_code=403, detail="Доступ закрыт")
+
     pipeline = [
         {"$lookup": {
             "from": "services",
