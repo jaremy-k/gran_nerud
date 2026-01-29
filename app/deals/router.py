@@ -72,7 +72,7 @@ async def get_deals(
 @router.get("/admin/get",
             response_model=list[SDealsWithRelations],
             summary="Получить список сделок со связанными объектами")
-async def get_deals_for_admins(data: SDeals = Depends(), user=Depends(get_current_user)):
+async def get_deals_for_admins(data: SDeals = Depends()):
     # if not hasattr(user, 'admin') or user.admin == False:
     #     raise HTTPException(status_code=403, detail="Доступ закрыт")
 
