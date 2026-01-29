@@ -3,3 +3,4 @@
 /.env*
 /.env_prod
 /sessions/*
+/poetry.lock

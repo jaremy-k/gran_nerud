@@ -1,17 +1,16 @@
+import json
 from datetime import datetime, date
 from typing import Optional
 
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
+from fastapi.responses import JSONResponse
 from starlette import status
 
 from app.deals.dao import DealsDAO
 from app.deals.shemas import SDeals, SDealsAdd, SDealsWithRelations, PaginatedResponse, PaginationParams
 from app.logger import logger
-from app.users.dependencies import get_current_user, get_current_admin_user
-
-from fastapi.responses import JSONResponse
-import json
+from app.users.dependencies import get_current_user
 
 router = APIRouter(
     prefix="/deals",
@@ -67,6 +66,71 @@ async def get_deals(
         include_relations=includeRelations  # Передаем параметр
     )
 
+    return result
+
+
+@router.get("/admin/get",
+            response_model=list[SDealsWithRelations],
+            summary="Получить список сделок со связанными объектами")
+async def get_deals_for_admins(data: SDeals = Depends(), user=Depends(get_current_user)):
+    if not hasattr(user, 'admin') or user.admin == False:
+        raise HTTPException(status_code=403, detail="Доступ закрыт")
+
+    pipeline = [
+        {"$lookup": {
+            "from": "services",
+            "localField": "serviceId",
+            "foreignField": "_id",
+            "as": "service"
+        }},
+        {"$lookup": {
+            "from": "customers",
+            "localField": "customerId",
+            "foreignField": "_id",
+            "as": "customer"
+        }},
+        {"$lookup": {
+            "from": "stages",
+            "localField": "stageId",
+            "foreignField": "_id",
+            "as": "stage"
+        }},
+        {"$lookup": {
+            "from": "materials",
+            "localField": "materialId",
+            "foreignField": "_id",
+            "as": "material"
+        }},
+        {"$lookup": {
+            "from": "addresses",
+            "localField": "shippingAddressId",
+            "foreignField": "_id",
+            "as": "shipping_address"
+        }},
+        {"$lookup": {
+            "from": "addresses",
+            "localField": "deliveryAddressId",
+            "foreignField": "_id",
+            "as": "delivery_address"
+        }},
+        {"$lookup": {
+            "from": "users",
+            "localField": "userId",
+            "foreignField": "_id",
+            "as": "user"
+        }},
+        {"$addFields": {
+            "service": {"$arrayElemAt": ["$service", 0]},
+            "customer": {"$arrayElemAt": ["$customer", 0]},
+            "stage": {"$arrayElemAt": ["$stage", 0]},
+            "material": {"$arrayElemAt": ["$material", 0]},
+            "shipping_address": {"$arrayElemAt": ["$shipping_address", 0]},
+            "delivery_address": {"$arrayElemAt": ["$delivery_address", 0]},
+            "user": {"$arrayElemAt": ["$user", 0]},
+        }}
+    ]
+
+    result = await DealsDAO.aggregate(pipeline)
     return result
 
 
@@ -137,71 +201,6 @@ async def get_deal_with_relations(id: str):
     deal_data = json.loads(json_str)
 
     return JSONResponse(content=deal_data)
-
-
-@router.get("/admin/get",
-            response_model=list[SDealsWithRelations],
-            summary="Получить список сделок со связанными объектами")
-async def get_deals_for_admins(data: SDeals = Depends(), user=Depends(get_current_user)):
-    if not hasattr(user, 'admin') or user.admin == False:
-        raise HTTPException(status_code=403, detail="Доступ закрыт")
-
-    pipeline = [
-        {"$lookup": {
-            "from": "services",
-            "localField": "serviceId",
-            "foreignField": "_id",
-            "as": "service"
-        }},
-        {"$lookup": {
-            "from": "customers",
-            "localField": "customerId",
-            "foreignField": "_id",
-            "as": "customer"
-        }},
-        {"$lookup": {
-            "from": "stages",
-            "localField": "stageId",
-            "foreignField": "_id",
-            "as": "stage"
-        }},
-        {"$lookup": {
-            "from": "materials",
-            "localField": "materialId",
-            "foreignField": "_id",
-            "as": "material"
-        }},
-        {"$lookup": {
-            "from": "addresses",
-            "localField": "shippingAddressId",
-            "foreignField": "_id",
-            "as": "shipping_address"
-        }},
-        {"$lookup": {
-            "from": "addresses",
-            "localField": "deliveryAddressId",
-            "foreignField": "_id",
-            "as": "delivery_address"
-        }},
-        {"$lookup": {
-            "from": "users",
-            "localField": "userId",
-            "foreignField": "_id",
-            "as": "user"
-        }},
-        {"$addFields": {
-            "service": {"$arrayElemAt": ["$service", 0]},
-            "customer": {"$arrayElemAt": ["$customer", 0]},
-            "stage": {"$arrayElemAt": ["$stage", 0]},
-            "material": {"$arrayElemAt": ["$material", 0]},
-            "shipping_address": {"$arrayElemAt": ["$shipping_address", 0]},
-            "delivery_address": {"$arrayElemAt": ["$delivery_address", 0]},
-            "user": {"$arrayElemAt": ["$user", 0]},
-        }}
-    ]
-
-    result = await DealsDAO.aggregate(pipeline)
-    return result
 
 
 @router.post(
@@ -426,7 +425,6 @@ async def check_material_dependencies(adress_id: str) -> bool:
     - False если зависимостей нет
     """
     # Пример проверки в других коллекциях
-    from app.deals.dao import DealsDAO
 
     # Проверяем, используется ли материал в продуктах
     # deals_using_company = await DealsDAO.count(
